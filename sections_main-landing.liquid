@@ -1,0 +1,760 @@
+<div class="gt-theme" id="gleam-team">
+  <style>
+  :root {
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    background: #0b0e13;
+    font: 16px/1.45 "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+    color: #f6f8ff;
+  }
+  .gt-theme {
+    min-height: 100vh;
+    background:
+      radial-gradient(900px 400px at 12% 0%, rgba(0, 194, 255, 0.1), transparent 55%),
+      radial-gradient(900px 360px at 88% 0%, rgba(58, 141, 255, 0.1), transparent 55%),
+      #0b0e13;
+    color: #f6f8ff;
+  }
+  .gt-theme a { color: #e4f0ff; }
+  .gt-container { max-width: 1200px; margin: 0 auto; padding: 26px; }
+  .gt-btn {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    padding: 12px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(135deg, rgba(58,141,255,0.15), rgba(0,194,255,0.12));
+    color: inherit; text-decoration: none; font-weight: 700; cursor: pointer; transition: 0.2s;
+  }
+  .gt-btn:hover { transform: translateY(-1px); }
+  .gt-btn.primary { border: none; background: linear-gradient(90deg,#3a8dff,#00c2ff,#0047ff); }
+  .gt-chip {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 6px 10px; border-radius: 999px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    color: #a7b0bd; font-weight: 700; font-size: 0.85rem;
+  }
+  .gt-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  .gt-grid { display: grid; gap: 18px; }
+  .gt-cols-12 { grid-template-columns: repeat(12, 1fr); }
+  .gt-col-4 { grid-column: span 4; }
+  .gt-col-6 { grid-column: span 6; }
+  .gt-col-8 { grid-column: span 8; }
+  .gt-col-12 { grid-column: span 12; }
+  @media (max-width: 980px) {
+    .gt-col-4, .gt-col-6, .gt-col-8 { grid-column: span 12; }
+    .gt-hero-inner { grid-template-columns: 1fr !important; }
+    .gt-nav-links { justify-content: center; }
+  }
+  .gt-muted { color: #a7b0bd; }
+  .gt-section-title { margin: 0 0 6px; font-size: clamp(22px, 4vw, 34px); }
+  .gt-nav { position: sticky; top: 0; z-index: 60; background: rgba(11,14,19,0.7); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .gt-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+  .gt-brand { font-weight: 900; letter-spacing: 0.4px; font-size: clamp(20px,4vw,28px); display: inline-flex; gap: 0.6rem; align-items: center; }
+  .gt-nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
+  .gt-hero { padding: 70px 0 46px; }
+  .gt-hero-inner { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: center; }
+  .gt-swoosh { height: 280px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12);
+    background:
+      radial-gradient(600px 200px at 20% 30%, rgba(58,141,255,0.30), transparent 60%),
+      radial-gradient(700px 220px at 70% 40%, rgba(0,194,255,0.25), transparent 65%),
+      radial-gradient(600px 260px at 50% 80%, rgba(0,71,255,0.28), transparent 60%),
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  }
+  .gt-feature-list { list-style: none; margin: 14px 0 8px; padding: 0; }
+  .gt-feature-list li { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; }
+  .gt-feature-list .dot { width: 8px; height: 8px; border-radius: 999px; background: linear-gradient(90deg,#00c2ff,#0047ff); margin-top: 7px; }
+  .gt-card-footer { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 12px; flex-wrap: wrap; }
+  .gt-note-card { padding: 16px; margin-top: 14px; }
+  .gt-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  .gt-table th, .gt-table td { border: 1px solid rgba(255,255,255,0.12); padding: 12px; text-align: left; }
+  .gt-table thead { background: rgba(255,255,255,0.06); }
+  .gt-table .is-disabled { color: rgba(255,255,255,0.45); filter: grayscale(1); }
+  .gt-addon-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 740px) { .gt-addon-grid { grid-template-columns: 1fr; } }
+  .gt-addon { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .gt-addon.disabled { opacity: 0.45; filter: grayscale(1); position: relative; }
+  .gt-addon.disabled::after { content: 'Unavailable'; font-size: 0.75rem; color: #f6f8ff; background: rgba(0,0,0,0.55); border-radius: 12px; padding: 4px 8px; align-self: flex-start; }
+  .gt-gallery { display: grid; grid-template-columns: repeat(12,1fr); gap: 10px; }
+  .gt-gallery img { width: 100%; height: 220px; object-fit: cover; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); cursor: zoom-in; }
+  @media (max-width: 980px) { .gt-gallery { grid-template-columns: repeat(6,1fr); } }
+  .gt-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 90; }
+  .gt-lightbox.show { display: flex; }
+  .gt-lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); }
+  .gt-testimonials { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  @media (max-width: 980px) { .gt-testimonials { grid-template-columns: 1fr; } }
+  .gt-testimonial { padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
+  .gt-faq .q { border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; background: rgba(255,255,255,0.06); padding: 14px; cursor: pointer; margin-top: 12px; }
+  .gt-faq .a { display: none; padding: 10px 12px; color: #a7b0bd; }
+  .gt-faq .q.open + .a { display: block; }
+  .gt-form-row { margin: 12px 0; }
+  .gt-form-row label { display: block; font-size: 0.9rem; margin-bottom: 8px; color: #a7b0bd; }
+  .gt-select, .gt-radio-list, .gt-checkbox-list { display: grid; gap: 10px; }
+  .gt-input, .gt-textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: #0e1118; color: #f6f8ff; }
+  .gt-inline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .gt-option { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); cursor: pointer; }
+  .gt-option.disabled { opacity: 0.45; filter: grayscale(1); cursor: not-allowed; }
+  .gt-split { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  @media (max-width: 640px) { .gt-split { grid-template-columns: 1fr; } }
+  .gt-price-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.12); }
+  .gt-total { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; font-weight: 800; font-size: 1.15rem; }
+  .gt-quote { opacity: 0.85; font-style: italic; }
+  .gt-bonus { display: none; }
+  .gt-bonus.show { display: flex; }
+  footer { padding: 40px 0; color: #a7b0bd; }
+  .gt-modal { position: fixed; inset: 0; display: none; place-items: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 80; }
+  .gt-modal.show { display: grid; }
+  .gt-sheet { width: min(900px, 92vw); background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04)); border: 1px solid rgba(255,255,255,0.12); border-radius: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); max-height: 88vh; display: flex; flex-direction: column; }
+  .gt-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .gt-sheet-body { flex: 1; display: grid; grid-template-columns: 1.1fr 0.9fr; min-height: 420px; overflow: auto; }
+  .gt-sheet-col { padding: 18px 20px; }
+  .gt-sheet-col + .gt-sheet-col { border-left: 1px solid rgba(255,255,255,0.12); }
+  @media (max-width: 880px) {
+    .gt-sheet-body { grid-template-columns: 1fr; }
+    .gt-sheet-col + .gt-sheet-col { border-left: none; border-top: 1px solid rgba(255,255,255,0.12); }
+  }
+  </style>
+
+  <nav class="gt-nav">
+    <div class="gt-container gt-nav-inner">
+      <div class="gt-brand">Gleam <span class="gt-chip">Mobile Detailing</span></div>
+      <div class="gt-nav-links">
+        <a href="#packages">Packages</a>
+        <a href="#addons">Add-ons</a>
+        <a href="#equipment">Equipment</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#faq">FAQ</a>
+        <a href="#booking" class="gt-btn primary">Book now</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="gt-container gt-hero" id="hero">
+    <div class="gt-hero-inner">
+      <div class="gt-card" style="padding:22px;">
+        <div class="gt-chip">🚐 Fully mobile · We come to you</div>
+        <h1 class="gt-section-title" style="margin-top:6px;">Premium Detailing Across Miami</h1>
+        <p class="gt-muted" style="max-width:62ch;">Choose between <strong>Gleam &amp; Go</strong>, <strong>Gleam+</strong>, and <strong>Ultimate Gleam</strong>. Transparent pricing adapts to sedans, SUVs, and oversized vehicles. Provide <strong>water &amp; electricity</strong> and we’ll thank you with a <strong class="gt-chip">complimentary surprise add-on</strong> at your appointment.</p>
+        <div class="gt-inline" style="margin-top:8px;">
+          <a href="#packages" class="gt-btn">View Packages</a>
+          <a href="#booking" class="gt-btn primary">Book Now</a>
+          <a id="gt-tap-call" class="gt-btn" href="tel:+13055550111">Call</a>
+        </div>
+      </div>
+      <div class="gt-swoosh gt-card" aria-hidden="true"></div>
+    </div>
+  </header>
+
+  <section class="gt-container" id="packages">
+    <h2 class="gt-section-title">Detailing Packages</h2>
+    <p class="gt-muted">Pick the tier that matches your vehicle’s condition. Motorcycles are visible for reference but currently unavailable.</p>
+    <div class="gt-grid gt-cols-12">
+      <article class="gt-card gt-col-4 gt-tier" data-tier="tier1" style="padding:22px;">
+        <h3>Gleam &amp; Go</h3>
+        <div class="gt-muted" style="font-size:0.92rem;">Basic upkeep · Best for maintenance</div>
+        <ul class="gt-feature-list">
+          <li><span class="dot"></span><div><strong>Exterior</strong>: Foam pre-soak, hand wash, wheels &amp; tires, streak-free rinse &amp; dry, glass, tire shine.</div></li>
+          <li><span class="dot"></span><div><strong>Interior</strong>: Vacuum, wipe-down, door jambs, mats &amp; carpets.</div></li>
+        </ul>
+        <div class="gt-card-footer">
+          <span class="gt-muted">From <strong>$80</strong> (sedan full)</span>
+          <button class="gt-btn" data-open-config>Configure</button>
+        </div>
+      </article>
+      <article class="gt-card gt-col-4 gt-tier" data-tier="tier2" style="padding:22px;">
+        <h3>Gleam+</h3>
+        <div class="gt-muted" style="font-size:0.92rem;">Enhanced clean · Ideal monthly refresh</div>
+        <ul class="gt-feature-list">
+          <li><span class="dot"></span><div><strong>Exterior</strong>: Everything in Tier 1 plus spray wax, bug/tar removal, trim dressing.</div></li>
+          <li><span class="dot"></span><div><strong>Interior</strong>: Everything in Tier 1 plus air freshening.</div></li>
+        </ul>
+        <div class="gt-card-footer">
+          <span class="gt-muted">From <strong>$120</strong> (sedan full)</span>
+          <button class="gt-btn" data-open-config>Configure</button>
+        </div>
+      </article>
+      <article class="gt-card gt-col-4 gt-tier" data-tier="tier3" style="padding:22px;">
+        <h3>Ultimate Gleam</h3>
+        <div class="gt-muted" style="font-size:0.92rem;">Premium gloss &amp; protection</div>
+        <ul class="gt-feature-list">
+          <li><span class="dot"></span><div><strong>Exterior</strong>: Everything in Tier 2 plus clay decon, polish or paint enhancer, premium wax/sealant (two-stage).</div></li>
+          <li><span class="dot"></span><div><strong>Interior</strong>: Everything in Tier 2.</div></li>
+        </ul>
+        <div class="gt-card-footer">
+          <span class="gt-muted">From <strong>$200</strong> (sedan full)</span>
+          <button class="gt-btn" data-open-config>Configure</button>
+        </div>
+      </article>
+    </div>
+
+    <table class="gt-table" aria-label="Package pricing by vehicle size">
+      <thead>
+        <tr>
+          <th>Vehicle</th>
+          <th>Gleam &amp; Go</th>
+          <th>Gleam+</th>
+          <th>Ultimate Gleam</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Sedan / Coupe</th>
+          <td>$60 exterior · $60 interior · $80 full</td>
+          <td>$90 exterior · $90 interior · $120 full</td>
+          <td>$150 exterior · $150 interior · $200 full</td>
+        </tr>
+        <tr>
+          <th>SUV / Truck</th>
+          <td>$75 exterior · $75 interior · $95 full</td>
+          <td>$110 exterior · $110 interior · $140 full</td>
+          <td>$175 exterior · $175 interior · $225 full</td>
+        </tr>
+        <tr>
+          <th>Oversized</th>
+          <td>$90 exterior · $90 interior · $110 full</td>
+          <td>$130 exterior · $130 interior · $160 full</td>
+          <td>$200 exterior · $200 interior · $250 full</td>
+        </tr>
+        <tr class="is-disabled">
+          <th>Motorcycle</th>
+          <td colspan="3">$60 · $90 · $120 — currently unavailable (coming soon)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="gt-card gt-note-card">
+      <span class="gt-chip">ℹ️</span>
+      <span class="gt-muted">Motorcycle services and ceramic/odor treatments are displayed for future planning but cannot be booked today.</span>
+    </div>
+  </section>
+
+
+  <section class="gt-container" id="addons" style="margin-top:34px;">
+    <h2 class="gt-section-title">Add-on Services</h2>
+    <p class="gt-muted">Enhance any package. Quote-only options are priced during confirmation.</p>
+    <div class="gt-addon-grid">
+      <div class="gt-card gt-addon">
+        <h3>Pet Hair Removal</h3>
+        <p class="gt-muted">Normal: <strong>$20</strong><br/>Excessive: <strong>$40</strong> (locks out normal option).</p>
+      </div>
+      <div class="gt-card gt-addon">
+        <h3>Engine Bay Detailing</h3>
+        <p class="gt-muted">Degrease, rinse, and dress accessible plastics. <strong>$20</strong>.</p>
+      </div>
+      <div class="gt-card gt-addon">
+        <h3>Bug &amp; Tar Removal</h3>
+        <p class="gt-muted">Included with Gleam+ and Ultimate Gleam. Otherwise quoted if buildup is severe.</p>
+      </div>
+      <div class="gt-card gt-addon">
+        <h3>Leather Cleaning &amp; Conditioning</h3>
+        <p class="gt-muted">Moisturize and protect leather seats and trim. Quoted after inspection.</p>
+      </div>
+      <div class="gt-card gt-addon disabled">
+        <h3>Ceramic Coating (Exterior, Windows, Rims, Interior)</h3>
+        <p class="gt-muted">Premium ceramic upgrades are coming soon. Not available for booking yet.</p>
+      </div>
+      <div class="gt-card gt-addon disabled">
+        <h3>Odor &amp; Smoke Termination</h3>
+        <p class="gt-muted">Enzyme &amp; ozone treatments launch soon. Currently unavailable.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="gt-container" id="equipment" style="margin-top:34px;">
+    <h2 class="gt-section-title">Pro Equipment Onboard</h2>
+    <div class="gt-grid gt-cols-12">
+      <div class="gt-col-6">
+        <div class="gt-card" style="padding:20px;">
+          <h3>Exterior Arsenal</h3>
+          <ul class="gt-feature-list">
+            <li><span class="dot"></span><div><a href="https://clean-garage.com/active-2-0-pressure-washer-level-4-detailing-kit-mtm-acqualine-package" target="_blank" rel="noopener">Active 2.0 Electric Pressure Washer</a> with MTM Hydro PF22 foam cannon for rich pre-soak coverage.</div></li>
+            <li><span class="dot"></span><div><a href="https://www.amazon.com/Meguiars-Ultra-Rich-Conditioner-Cleaning-Conditioning/dp/B071HR14SJ" target="_blank" rel="noopener">Meguiar’s Gold Class pH-neutral soap</a> stays wet under Miami sun without stripping protection.</div></li>
+            <li><span class="dot"></span><div>100-gal mobile water tank keeps us independent on-site; bonus add-on unlocked when you share utilities.</div></li>
+            <li><span class="dot"></span><div><a href="https://theragcompany.com/products/the-cyclone-ultra-wash-pad" target="_blank" rel="noopener">Cyclone Ultra wash pads</a> plus dedicated grit-guard buckets for swirl-free contact washing.</div></li>
+            <li><span class="dot"></span><div>Wheel Woolies, Speed Master brushes, and <a href="https://www.autogeek.net/sonax-wheel-cleaner.html" target="_blank" rel="noopener">SONAX wheel cleaners</a> tackle tight spokes and brake dust safely.</div></li>
+          </ul>
+        </div>
+      </div>
+      <div class="gt-col-6">
+        <div class="gt-card" style="padding:20px;">
+          <h3>Interior Detail Kit</h3>
+          <ul class="gt-feature-list">
+            <li><span class="dot"></span><div><a href="https://www.amazon.com/Armor-Gallon-Utility-Vacuum-AA255/dp/B00Y5BX674" target="_blank" rel="noopener">Armor All 2.5 gal wet/dry vac</a> with crevice tools for tight spots and blower function for drip points.</div></li>
+            <li><span class="dot"></span><div><a href="https://clean-garage.com/detail-factory-pet-hair-brush-set-3-products-brush-card-and-rake" target="_blank" rel="noopener">Detail Factory pet hair tools</a> plus Koch Chemie brushes for vents, seams, and badges.</div></li>
+            <li><span class="dot"></span><div><a href="https://clean-garage.com/autofiber-the-reacher-gpt-kit-extension-tool-and-glass-perfect-towels" target="_blank" rel="noopener">AutoFiber Reacher glass kit</a> &amp; Eagle Edgeless 500 towels for streak-free glass and final buffing.</div></li>
+            <li><span class="dot"></span><div><a href="https://www.amazon.com/AutoRight-SteamMachine-C900054-M-Multi-Purpose-Upholstery/dp/B01JYVLF0Y" target="_blank" rel="noopener">905e steam cleaner</a> sanitizes cup holders, leather, and fabrics without harsh chemicals.</div></li>
+            <li><span class="dot"></span><div>Calif. Air Tools ultra-quiet compressor, Flex XC 3401 polisher, and Menzerna Power Lock sealant for premium gloss.</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="gt-container" id="gallery" style="margin-top:34px;">
+    <h2 class="gt-section-title">Before &amp; After Highlights</h2>
+    <p class="gt-muted">A quick look at recent transformations.</p>
+    <div class="gt-gallery">
+      <img src="https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?q=80&w=1200&auto=format&fit=crop" alt="Foam cannon covering a sports car" data-zoom/>
+      <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200&auto=format&fit=crop" alt="SUV interior vacuuming" data-zoom/>
+      <img src="https://images.unsplash.com/photo-1623377646908-6b85b0d7bf78?q=80&w=1200&auto=format&fit=crop" alt="Wheel detailing with brush" data-zoom/>
+      <img src="https://images.unsplash.com/photo-1607853202273-797f1c22a38c?q=80&w=1200&auto=format&fit=crop" alt="Paint polishing for gloss" data-zoom/>
+      <img src="https://images.unsplash.com/photo-1593941707874-ef25b8b4a92e?q=80&w=1200&auto=format&fit=crop" alt="Clean SUV exterior" data-zoom/>
+      <img src="https://images.unsplash.com/photo-1574333751907-b7aef0b0848b?q=80&w=1200&auto=format&fit=crop" alt="Detailer drying vehicle with microfiber" data-zoom/>
+    </div>
+  </section>
+  <div class="gt-lightbox" id="gt-lightbox"><img alt="Zoomed detailing photo"/></div>
+
+  <section class="gt-container" id="testimonials" style="margin-top:34px;">
+    <h2 class="gt-section-title">Client Reviews</h2>
+    <div class="gt-testimonials">
+      <div class="gt-testimonial"><strong>Maria K.</strong><br/><span class="gt-muted">Full Wash · SUV</span><p>“They came to my office, finished on schedule, and my SUV looked brand new. Highly recommend.”</p></div>
+      <div class="gt-testimonial"><strong>Andre P.</strong><br/><span class="gt-muted">Ultimate Gleam · Sedan</span><p>“Zero swirls and the polish pops. Worth every penny for how smooth the paint feels.”</p></div>
+      <div class="gt-testimonial"><strong>Jasmine C.</strong><br/><span class="gt-muted">Gleam+ · Oversized</span><p>“Great communication, friendly techs, and excellent attention to detail. Already booked my follow-up.”</p></div>
+    </div>
+  </section>
+
+  <section class="gt-container" id="faq" style="margin-top:34px;">
+    <h2 class="gt-section-title">FAQ</h2>
+    <div class="gt-faq">
+      <div class="q">Do I need to be home during the appointment?</div>
+      <div class="a">Not necessarily—just ensure we have access to the vehicle and enough space to work safely.</div>
+      <div class="q">What if I can’t supply water &amp; electricity?</div>
+      <div class="a">We’re fully mobile, but sharing both unlocks a complimentary surprise add-on as a thank-you.</div>
+      <div class="q">How do you handle oversized vehicles?</div>
+      <div class="a">Each tier has a transparent surcharge for SUVs/Trucks and Oversized vehicles. The configurator calculates totals instantly before you book.</div>
+      <div class="q">Which payments do you accept?</div>
+      <div class="a">We accept major cards, Cash App, Zelle, and contactless payments once service is complete.</div>
+    </div>
+  </section>
+
+  <section class="gt-container" id="booking" style="margin-top:34px;margin-bottom:60px;">
+    <h2 class="gt-section-title">Book Your Detail</h2>
+    <p class="gt-muted" style="max-width:70ch;">Choose a date, confirm your contact information, and we’ll prepare an email with your configuration summary. You can review everything before sending.</p>
+    <div class="gt-grid gt-cols-12">
+      <div class="gt-col-8 gt-card" style="padding:18px;">
+        <form id="gt-booking-form" onsubmit="return gtComposeEmail();">
+          <div class="gt-split">
+            <div class="gt-form-row"><label for="gt-name">Full Name</label><input id="gt-name" class="gt-input" required placeholder="First &amp; Last Name"/></div>
+            <div class="gt-form-row"><label for="gt-phone">Phone</label><input id="gt-phone" class="gt-input" type="tel" required placeholder="(###) ###-####"/></div>
+          </div>
+          <div class="gt-form-row"><label for="gt-email">Email</label><input id="gt-email" class="gt-input" type="email" required placeholder="you@example.com"/></div>
+          <div class="gt-form-row"><label for="gt-address">Service Address</label><input id="gt-address" class="gt-input" required placeholder="Street, City, ZIP"/></div>
+          <div class="gt-split">
+            <div class="gt-form-row"><label for="gt-date">Preferred Date</label><input id="gt-date" class="gt-input" type="date" required/></div>
+            <div class="gt-form-row"><label for="gt-time">Preferred Time</label><input id="gt-time" class="gt-input" type="time" required/></div>
+          </div>
+          <div class="gt-form-row"><label for="gt-notes">Notes</label><textarea id="gt-notes" class="gt-textarea" rows="3" placeholder="Gate codes, paint concerns, pets, etc."></textarea></div>
+          <div class="gt-inline" style="margin-top:12px;">
+            <button type="submit" class="gt-btn primary">Send Request Email</button>
+            <button type="button" class="gt-btn" onclick="gtCopySummary();">Copy Summary</button>
+            <span class="gt-chip">📧 You’ll review the email before sending</span>
+          </div>
+        </form>
+      </div>
+      <div class="gt-col-4">
+        <div class="gt-card" style="padding:18px;">
+          <div class="gt-inline" style="justify-content:space-between;"><strong>Selected Service</strong><span class="gt-chip" id="gt-price-chip">Total: —</span></div>
+          <pre id="gt-selection-summary" style="white-space:pre-wrap;word-break:break-word;background:#0e1118;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);">No selection yet. Configure a package to see the summary.</pre>
+          <span class="gt-muted" style="font-size:0.9rem;">🧾 Totals are estimates. Excessive soil or pet hair may require an updated quote onsite.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="gt-container">
+    <div class="gt-grid gt-cols-12">
+      <div class="gt-col-6 gt-muted">© <span id="gt-year"></span> Gleam Team Mobile Detailing · Miami, FL</div>
+      <div class="gt-col-6" style="text-align:right;"><a class="gt-muted" href="#packages">Back to top ↑</a></div>
+    </div>
+  </footer>
+
+  <div id="gt-config-modal" class="gt-modal" aria-hidden="true" role="dialog" aria-label="Configure Service">
+    <div class="gt-sheet">
+      <div class="gt-sheet-head">
+        <div>
+          <div class="gt-chip" id="gt-tier-chip">Tier</div>
+          <h3 id="gt-modal-title" style="margin:6px 0 0;">Configure Service</h3>
+        </div>
+        <button class="gt-btn" type="button" onclick="gtCloseModal();">✕ Close</button>
+      </div>
+      <div class="gt-sheet-body">
+        <div class="gt-sheet-col">
+          <div class="gt-form-row"><label>Choose Service</label><div class="gt-radio-list" id="gt-service-type-list"></div></div>
+          <div class="gt-form-row"><label>Vehicle Type (required)</label>
+            <div class="gt-split">
+              <label class="gt-option"><input type="radio" name="vehicle" value="sedan" required/> Sedan / Coupe</label>
+              <label class="gt-option"><input type="radio" name="vehicle" value="suv"/> SUV / Truck</label>
+              <label class="gt-option"><input type="radio" name="vehicle" value="oversized"/> Oversized</label>
+            </div>
+          </div>
+          <div class="gt-form-row"><label>Will you provide water &amp; electricity? (required)</label>
+            <div class="gt-split">
+              <label class="gt-option"><input type="radio" name="utilities" value="yes" required/> Yes</label>
+              <label class="gt-option"><input type="radio" name="utilities" value="no"/> No</label>
+            </div>
+            <div class="gt-inline gt-bonus" id="gt-bonus-note" style="margin-top:10px;"><span class="gt-chip" style="border-color:#19d47b;background:rgba(25,212,123,0.1);">🎁 Bonus add-on included (revealed onsite)</span></div>
+          </div>
+          <div class="gt-form-row"><label>Add-ons (optional)</label><div class="gt-checkbox-list" id="gt-addon-list"></div></div>
+        </div>
+        <div class="gt-sheet-col" style="background:rgba(0,0,0,0.15);">
+          <div>
+            <div class="gt-chip">Included with this tier</div>
+            <ul class="gt-feature-list" id="gt-included-list" style="margin-top:10px;"></ul>
+          </div>
+          <hr style="border:none;border-top:1px solid rgba(255,255,255,0.12);margin:12px 0;"/>
+          <div>
+            <div class="gt-chip">Price breakdown</div>
+            <div id="gt-price-breakdown" style="margin-top:10px;"></div>
+            <div class="gt-total"><span>Total</span><span id="gt-calc-total">—</span></div>
+            <div class="gt-inline" style="margin-top:10px;"><button class="gt-btn primary" type="button" onclick="gtApplySelection();">Continue to booking</button><button class="gt-btn" type="button" onclick="gtCloseModal();">Cancel</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+  const GT_COMPANY = {
+    salesEmail: 'bookings@gleamteamdetailing.com',
+    phone: '+1-305-555-0111',
+    brand: 'Gleam Team Mobile Detailing',
+    address: 'Miami, FL',
+    serviceArea: 'Miami & South Florida'
+  };
+
+  const GT_DATA = {
+    tiers: {
+      tier1: {
+        key: 'tier1', name: 'Gleam & Go', subtitle: 'Basic upkeep',
+        base: { exterior: 60, interior: 60, full: 80, motorcycle: 60 },
+        surcharge: { suv: 15, oversized: 30 },
+        includes: {
+          exterior: [ 'Pressure wash & foam cannon pre-soak', 'Hand wash with pH-balanced soap', 'Wheel & tire cleaning', 'Streak-free rinse & dry', 'Glass cleaning', 'Tire shine' ],
+          interior: [ 'Vacuum', 'Dusting & wipe-down', 'Door jambs', 'Floor mats & carpets' ]
+        }
+      },
+      tier2: {
+        key: 'tier2', name: 'Gleam+', subtitle: 'Enhanced clean',
+        base: { exterior: 90, interior: 90, full: 120, motorcycle: 90 },
+        surcharge: { suv: 20, oversized: 40 },
+        includes: {
+          exterior: [ 'Everything in Gleam & Go', 'Spray wax', 'Bug/tar removal', 'Trim dressing' ],
+          interior: [ 'Everything in Gleam & Go', 'Air freshening' ]
+        }
+      },
+      tier3: {
+        key: 'tier3', name: 'Ultimate Gleam', subtitle: 'Premium gloss & protection',
+        base: { exterior: 150, interior: 150, full: 200, motorcycle: 120 },
+        surcharge: { suv: 25, oversized: 50 },
+        includes: {
+          exterior: [ 'Everything in Gleam+', 'Clay bar/pad decontamination', 'Polish or paint enhancer', 'Premium wax or sealant (two-stage)' ],
+          interior: [ 'Everything in Gleam+' ]
+        }
+      }
+    },
+    addons: [
+      { id: 'pethair', label: 'Pet Hair Removal — Normal', price: 20 },
+      { id: 'pethairexcess', label: 'Pet Hair Removal — Excessive', price: 40, exclusiveWith: ['pethair'] },
+      { id: 'engine', label: 'Engine Bay Detailing', price: 20 },
+      { id: 'bugtar', label: 'Bug/Tar Removal (if not included)', price: null },
+      { id: 'leather', label: 'Leather Cleaning & Conditioning', price: null },
+      { id: 'ceramicInt', label: 'Ceramic Coating — Interior', price: 500, disabled: true },
+      { id: 'ceramicExt', label: 'Ceramic Coating — Exterior', price: null, disabled: true },
+      { id: 'ceramicGlass', label: 'Ceramic Coating — Windows Only', price: null, disabled: true },
+      { id: 'ceramicRims', label: 'Ceramic Coating — Rims Only', price: null, disabled: true },
+      { id: 'odor', label: 'Odor & Smoke Termination', price: null, disabled: true }
+    ]
+  };
+
+  const gtState = { openTier: null, service: 'full', vehicle: null, utilities: null, addons: new Set(), quotes: new Set(), total: 0 };
+
+  const $ = (q, el = document) => el.querySelector(q);
+  const $$ = (q, el = document) => Array.from(el.querySelectorAll(q));
+  const gtMoney = n => (n === null || Number.isNaN(n)) ? '—' : `$${n.toFixed(0)}`;
+
+  function gtSmoothAnchors() {
+    $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length > 1) {
+        e.preventDefault();
+        const target = document.querySelector(id);
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      }
+    }));
+  }
+
+  function gtInitLightbox() {
+    const lb = $('#gt-lightbox');
+    if (!lb) return;
+    $$('#gallery [data-zoom]').forEach(img => img.addEventListener('click', () => {
+      lb.querySelector('img').src = img.src;
+      lb.classList.add('show');
+    }));
+    lb.addEventListener('click', () => lb.classList.remove('show'));
+  }
+
+  const gtModal = $('#gt-config-modal');
+  function gtOpenModal(tierKey) {
+    gtState.openTier = tierKey;
+    gtState.service = 'full';
+    gtState.vehicle = null;
+    gtState.utilities = null;
+    gtState.addons.clear();
+    gtState.quotes.clear();
+    const tier = GT_DATA.tiers[tierKey];
+    if (!tier) return;
+    $('#gt-tier-chip').textContent = tier.name;
+    $('#gt-modal-title').textContent = `${tier.name} — Configure`;
+    const serviceHtml = [
+      ['exterior','Exterior Only'],
+      ['interior','Interior Only'],
+      ['full','Full Wash'],
+      ['motorcycle','Motorcycle (coming soon)', true]
+    ].map(([val, label, disabled]) => {
+      const cls = disabled ? 'gt-option disabled' : 'gt-option';
+      const dis = disabled ? 'disabled' : '';
+      const chk = val === 'full' && !disabled ? 'checked' : '';
+      return `<label class="${cls}"><input type="radio" name="serviceType" value="${val}" ${dis} ${chk}/> ${label}</label>`;
+    }).join('');
+    $('#gt-service-type-list').innerHTML = serviceHtml;
+    gtRenderIncludes();
+    $('#gt-addon-list').innerHTML = GT_DATA.addons.map(a => {
+      const classes = ['gt-option'];
+      if (a.disabled) classes.push('disabled');
+      const dis = a.disabled ? 'disabled' : '';
+      const hint = a.disabled ? '<span class="gt-quote">(coming soon)</span>' : (a.price === null ? '<span class="gt-quote">(quote)</span>' : `<span>${gtMoney(a.price)}</span>`);
+      return `<label class="${classes.join(' ')}" data-addon="${a.id}"><input type="checkbox" value="${a.id}" ${dis}/> ${a.label} ${hint}</label>`;
+    }).join('');
+    $$('input[name="vehicle"]').forEach(i => { i.checked = false; });
+    $$('input[name="utilities"]').forEach(i => { i.checked = false; });
+    $('#gt-bonus-note').classList.remove('show');
+    $$('input[name="serviceType"]').forEach(i => i.onchange = () => { gtState.service = i.value; gtRenderIncludes(); gtUpdatePrice(); });
+    $$('input[name="vehicle"]').forEach(i => i.onchange = () => { gtState.vehicle = i.value; gtUpdatePrice(); });
+    $$('input[name="utilities"]').forEach(i => i.onchange = () => {
+      gtState.utilities = i.value;
+      $('#gt-bonus-note').classList.toggle('show', i.value === 'yes');
+    });
+    $$('#gt-addon-list input[type="checkbox"]').forEach(i => i.onchange = () => { gtToggleAddon(i.value, i.checked); gtUpdatePrice(); });
+    gtUpdatePrice();
+    gtModal.classList.add('show');
+    gtModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('noscroll');
+  }
+  function gtCloseModal() {
+    gtModal.classList.remove('show');
+    gtModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('noscroll');
+  }
+
+  function gtRenderIncludes() {
+    const tier = GT_DATA.tiers[gtState.openTier];
+    if (!tier) return;
+    const inc = tier.includes;
+    const list = [];
+    if (gtState.service === 'exterior' || gtState.service === 'full') {
+      for (const item of inc.exterior) list.push(`<li><span class="dot"></span><div>${item}</div></li>`);
+    }
+    if (gtState.service === 'interior' || gtState.service === 'full') {
+      for (const item of inc.interior) list.push(`<li><span class="dot"></span><div>${item}</div></li>`);
+    }
+    $('#gt-included-list').innerHTML = list.join('') || '<li class="gt-muted">Select a service to see inclusions.</li>';
+  }
+
+  function gtToggleAddon(id, on) {
+    const def = GT_DATA.addons.find(a => a.id === id);
+    if (!def || def.disabled) return;
+    if (on) {
+      gtState.addons.add(id);
+      if (def.price === null) gtState.quotes.add(id); else gtState.quotes.delete(id);
+      if (def.exclusiveWith) {
+        def.exclusiveWith.forEach(other => {
+          gtState.addons.delete(other);
+          const cb = $(`#gt-addon-list input[value="${other}"]`);
+          if (cb) cb.checked = false;
+        });
+      }
+    } else {
+      gtState.addons.delete(id);
+      gtState.quotes.delete(id);
+    }
+  }
+
+  function gtUpdatePrice() {
+    const tier = GT_DATA.tiers[gtState.openTier];
+    if (!tier) return;
+    let base = tier.base[gtState.service] ?? 0;
+    let surcharge = 0;
+    if (gtState.vehicle === 'suv') surcharge = tier.surcharge.suv;
+    if (gtState.vehicle === 'oversized') surcharge = tier.surcharge.oversized;
+    if (gtState.service === 'motorcycle') surcharge = 0;
+    let addonsTotal = 0;
+    const priced = [];
+    const quoted = [];
+    for (const id of gtState.addons) {
+      const a = GT_DATA.addons.find(x => x.id === id);
+      if (!a || a.disabled) continue;
+      if (a.price === null) {
+        quoted.push(a);
+      } else {
+        addonsTotal += a.price;
+        priced.push(a);
+      }
+    }
+    const subtotal = base + surcharge + addonsTotal;
+    gtState.total = subtotal;
+    const rows = [];
+    const baseLabel = gtState.vehicle ? `Base (${tier.name} · ${gtLabelService(gtState.service)} · Sedan)` : `Base (${tier.name} · ${gtLabelService(gtState.service)})`;
+    rows.push(gtRow(baseLabel, base));
+    if (surcharge > 0) rows.push(gtRow(`Vehicle surcharge (${gtLabelVehicle(gtState.vehicle)})`, surcharge));
+    for (const a of priced) rows.push(gtRow(a.label, a.price));
+    if (quoted.length) rows.push(`<div class="gt-price-row"><span>${quoted.length} add-on(s) require quote</span><span class="gt-quote">TBD</span></div>`);
+    $('#gt-price-breakdown').innerHTML = rows.join('');
+    $('#gt-calc-total').textContent = gtMoney(subtotal);
+  }
+  function gtRow(label, amount) {
+    return `<div class="gt-price-row"><span>${label}</span><span>${gtMoney(amount)}</span></div>`;
+  }
+  function gtLabelService(s) {
+    if (s === 'full') return 'Full Wash';
+    if (s === 'exterior') return 'Exterior Only';
+    if (s === 'interior') return 'Interior Only';
+    return 'Motorcycle';
+  }
+  function gtLabelVehicle(v) {
+    if (v === 'sedan') return 'Sedan/Coupe';
+    if (v === 'suv') return 'SUV/Truck';
+    if (v === 'oversized') return 'Oversized';
+    return 'Sedan/Coupe';
+  }
+
+  function gtRequireModalFields() {
+    if (!gtState.vehicle) return 'Please select your vehicle type.';
+    if (!gtState.utilities) return 'Please confirm if you can provide water & electricity.';
+    return null;
+  }
+
+  function gtApplySelection() {
+    const err = gtRequireModalFields();
+    if (err) { alert(err); return; }
+    const tier = GT_DATA.tiers[gtState.openTier];
+    if (!tier) return;
+    const svc = gtLabelService(gtState.service);
+    const veh = gtLabelVehicle(gtState.vehicle);
+    const util = gtState.utilities === 'yes' ? 'Yes (bonus add-on included)' : 'No';
+    const chosenAddons = Array.from(gtState.addons).map(id => {
+      const a = GT_DATA.addons.find(x => x.id === id);
+      if (!a || a.disabled) return null;
+      return `${a.label}${a.price === null ? ' (quote)' : ''}`;
+    }).filter(Boolean);
+    const summaryParts = [
+      `Package: ${tier.name}`,
+      `Service: ${svc}`,
+      `Vehicle: ${veh}`,
+      `Water & Electricity Provided: ${util}`,
+      `Add-Ons: ${chosenAddons.length ? chosenAddons.join('; ') : 'None'}`,
+      `Estimated Total: ${gtMoney(gtState.total)}`
+    ];
+    const inclusionSections = [];
+    if (gtState.service === 'exterior' || gtState.service === 'full') inclusionSections.push('Inclusions — Exterior:
+• ' + tier.includes.exterior.join('
+• '));
+    if (gtState.service === 'interior' || gtState.service === 'full') inclusionSections.push('Inclusions — Interior:
+• ' + tier.includes.interior.join('
+• '));
+    $('#gt-selection-summary').textContent = summaryParts.join('
+') + (inclusionSections.length ? '
+
+' + inclusionSections.join('
+
+') : '');
+    $('#gt-price-chip').textContent = `Total: ${gtMoney(gtState.total)}`;
+    gtCloseModal();
+    const booking = document.getElementById('booking');
+    if (booking) booking.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function gtComposeEmail() {
+    const name = $('#gt-name').value.trim();
+    const phone = $('#gt-phone').value.trim();
+    const email = $('#gt-email').value.trim();
+    const address = $('#gt-address').value.trim();
+    const date = $('#gt-date').value;
+    const time = $('#gt-time').value;
+    const notes = $('#gt-notes').value.trim();
+    if (!name || !phone || !email || !address || !date || !time) {
+      alert('Please complete all required booking fields.');
+      return false;
+    }
+    const subject = encodeURIComponent(`[${GT_COMPANY.brand}] Booking Request — ${name}`);
+    const body = encodeURIComponent([
+      `Name: ${name}`,
+      `Phone: ${phone}`,
+      `Email: ${email}`,
+      `Address: ${address}`,
+      `Preferred Date/Time: ${date} @ ${time}`,
+      '',
+      '--- Selected Service ---',
+      $('#gt-selection-summary').textContent,
+      '',
+      'Notes:',
+      notes || '—'
+    ].join('
+'));
+    window.location.href = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${body}`;
+    return false;
+  }
+
+  function gtCopySummary() {
+    const text = $('#gt-selection-summary').textContent;
+    if (!text || /No selection/.test(text)) {
+      alert('Configure a package first.');
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => alert('Summary copied!'));
+  }
+
+  function gtInit() {
+    $('#gt-year').textContent = new Date().getFullYear();
+    gtSmoothAnchors();
+    gtInitLightbox();
+    $$('[data-open-config]').forEach(btn => btn.addEventListener('click', e => {
+      const card = e.target.closest('.gt-tier');
+      if (!card) return;
+      gtOpenModal(card.getAttribute('data-tier'));
+    }));
+    const callBtn = $('#gt-tap-call');
+    if (callBtn) callBtn.href = `tel:${GT_COMPANY.phone.replace(/[^+\d]/g,'')}`;
+    $$('#faq .q').forEach(q => q.addEventListener('click', () => q.classList.toggle('open')));
+  }
+
+  document.addEventListener('DOMContentLoaded', gtInit);
+  </script>
+
+  <script type="application/ld+json">{
+    "@context":"https://schema.org",
+    "@type":"AutoDetailing",
+    "name":"Gleam Team Mobile Detailing",
+    "image":"",
+    "url":"",
+    "telephone":"+13055550111",
+    "areaServed":"Miami, FL",
+    "address":{"@type":"PostalAddress","addressLocality":"Miami","addressRegion":"FL","addressCountry":"US"},
+    "description":"Mobile detailing in South Florida offering Gleam & Go, Gleam+, and Ultimate Gleam packages with on-site water supply.",
+    "sameAs":[]
+  }</script>
+</div>
+
+{% schema %}
+{
+  "name": "Landing – Gleam Team",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Landing – Gleam Team"
+    }
+  ]
+}
+{% endschema %}
