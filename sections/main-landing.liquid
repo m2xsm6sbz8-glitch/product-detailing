@@ -84,8 +84,14 @@
   .gt-feature-list .dot { width: 8px; height: 8px; border-radius: 999px; background: linear-gradient(90deg,#00c2ff,#0047ff); margin-top: 7px; }
   .gt-card-footer { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 12px; flex-wrap: wrap; }
   .gt-note-card { padding: 16px; margin-top: 14px; }
-  .gt-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-  .gt-table th, .gt-table td { border: 1px solid rgba(255,255,255,0.12); padding: 12px; text-align: left; }
+  .gt-table-wrapper {
+    margin-top: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .gt-table { width: 100%; min-width: 540px; border-collapse: collapse; margin: 0; }
+  .gt-table th, .gt-table td { border: 1px solid rgba(255,255,255,0.12); padding: 12px; text-align: left; white-space: nowrap; }
+  .gt-table-wrapper::-webkit-scrollbar { display: none; }
   .gt-table thead { background: rgba(255,255,255,0.06); }
   .gt-table .is-disabled { color: rgba(255,255,255,0.45); filter: grayscale(1); }
   .gt-addon-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -210,40 +216,42 @@
       </article>
     </div>
 
-    <table class="gt-table" aria-label="Package pricing by vehicle size">
-      <thead>
-        <tr>
-          <th>Vehicle</th>
-          <th>Gleam &amp; Go</th>
-          <th>Gleam+</th>
-          <th>Ultimate Gleam</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>Sedan / Coupe</th>
-          <td>$60 exterior · $60 interior · $80 full</td>
-          <td>$90 exterior · $90 interior · $120 full</td>
-          <td>$150 exterior · $150 interior · $200 full</td>
-        </tr>
-        <tr>
-          <th>SUV / Truck</th>
-          <td>$75 exterior · $75 interior · $95 full</td>
-          <td>$110 exterior · $110 interior · $140 full</td>
-          <td>$175 exterior · $175 interior · $225 full</td>
-        </tr>
-        <tr>
-          <th>Oversized</th>
-          <td>$90 exterior · $90 interior · $110 full</td>
-          <td>$130 exterior · $130 interior · $160 full</td>
-          <td>$200 exterior · $200 interior · $250 full</td>
-        </tr>
-        <tr class="is-disabled">
-          <th>Motorcycle</th>
-          <td colspan="3">$60 · $90 · $120 — currently unavailable (coming soon)</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="gt-table-wrapper" role="region" aria-label="Scroll to explore pricing" tabindex="0">
+      <table class="gt-table" aria-label="Package pricing by vehicle size">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Gleam &amp; Go</th>
+            <th>Gleam+</th>
+            <th>Ultimate Gleam</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Sedan / Coupe</th>
+            <td>$60 exterior · $60 interior · $80 full</td>
+            <td>$90 exterior · $90 interior · $120 full</td>
+            <td>$150 exterior · $150 interior · $200 full</td>
+          </tr>
+          <tr>
+            <th>SUV / Truck</th>
+            <td>$75 exterior · $75 interior · $95 full</td>
+            <td>$110 exterior · $110 interior · $140 full</td>
+            <td>$175 exterior · $175 interior · $225 full</td>
+          </tr>
+          <tr>
+            <th>Oversized</th>
+            <td>$90 exterior · $90 interior · $110 full</td>
+            <td>$130 exterior · $130 interior · $160 full</td>
+            <td>$200 exterior · $200 interior · $250 full</td>
+          </tr>
+          <tr class="is-disabled">
+            <th>Motorcycle</th>
+            <td colspan="3">$60 · $90 · $120 — currently unavailable (coming soon)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div class="gt-card gt-note-card">
       <span class="gt-chip">ℹ️</span>
@@ -570,24 +578,24 @@
     gtUpdateNavCondensed();
   }
 
-  let gtNavWasCondensed = false;
-  function gtUpdateNavCondensed() {
-    if (!gtNav) return;
-    const isMobile = window.innerWidth <= 760;
-    const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
-    let progress = 0;
-    if (isMobile && !menuOpen) {
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      const condenseThreshold = 120;
-      progress = Math.min(Math.max(scrollY / condenseThreshold, 0), 1);
-    }
-    gtNav.style.setProperty('--nav-collapse', progress.toFixed(3));
-    const shouldCondense = isMobile && !menuOpen && progress > 0.6;
-    if (shouldCondense !== gtNavWasCondensed) {
-      gtNav.classList.toggle('is-condensed', shouldCondense);
-      gtNavWasCondensed = shouldCondense;
-    }
-  }
+  let gtNavWasCondensed = false;␊
+  function gtUpdateNavCondensed() {␊
+    if (!gtNav) return;␊
+    const isMobile = window.innerWidth <= 760;␊
+    const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');␊
+    let collapse = 0;
+    if (isMobile && !menuOpen) {␊
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;␊
+      const condenseThreshold = 120;␊
+      collapse = scrollY >= condenseThreshold ? 1 : 0;
+    }␊
+    gtNav.style.setProperty('--nav-collapse', collapse.toFixed(3));
+    const shouldCondense = isMobile && !menuOpen && collapse === 1;
+    if (shouldCondense !== gtNavWasCondensed) {␊
+      gtNav.classList.toggle('is-condensed', shouldCondense);␊
+      gtNavWasCondensed = shouldCondense;␊
+    }␊
+  }␊
 
   function gtSmoothAnchors(evt) {
     const link = evt.target.closest('a[href^="#"]');
@@ -953,6 +961,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
