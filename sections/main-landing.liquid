@@ -9,6 +9,7 @@
     font: 16px/1.45 "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
     color: #f6f8ff;
   }
+  body.noscroll { overflow: hidden; }
   .gt-theme {
     min-height: 100vh;
     background:
@@ -124,7 +125,6 @@
       <div class="gt-nav-links">
         <a href="#packages">Packages</a>
         <a href="#addons">Add-ons</a>
-        <a href="#equipment">Equipment</a>
         <a href="#gallery">Gallery</a>
         <a href="#faq">FAQ</a>
         <a href="#booking" class="gt-btn primary">Book now</a>
@@ -263,7 +263,7 @@
     </div>
   </section>
 
-  <section class="gt-container" id="equipment" style="margin-top:34px;">
+  <section class="gt-container" id="equipment" style="margin-top:34px;display:none;" aria-hidden="true">
     <h2 class="gt-section-title">Pro Equipment Onboard</h2>
     <div class="gt-grid gt-cols-12">
       <div class="gt-col-6">
@@ -306,7 +306,7 @@
       <img src="https://images.unsplash.com/photo-1574333751907-b7aef0b0848b?q=80&w=1200&auto=format&fit=crop" alt="Detailer drying vehicle with microfiber" data-zoom/>
     </div>
   </section>
-  <div class="gt-lightbox" id="gt-lightbox"><img alt="Zoomed detailing photo"/></div>
+  <div class="gt-lightbox" id="gt-lightbox" aria-hidden="true" role="dialog"><img alt="Zoomed detailing photo"/></div>
 
   <section class="gt-container" id="testimonials" style="margin-top:34px;">
     <h2 class="gt-section-title">Client Reviews</h2>
@@ -475,29 +475,34 @@
   const $$ = (q, el = document) => Array.from(el.querySelectorAll(q));
   const gtMoney = n => (n === null || Number.isNaN(n)) ? '—' : `$${n.toFixed(0)}`;
 
-  function gtSmoothAnchors() {
-    $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
-      const id = a.getAttribute('href');
-      if (id.length > 1) {
-        e.preventDefault();
-        const target = document.querySelector(id);
-        if (target) target.scrollIntoView({ behavior: 'smooth' });
-      }
-    }));
+  function gtSmoothAnchors(evt) {
+    const link = evt.target.closest('a[href^="#"]');
+    if (!link || link.getAttribute('href') === '#') return;
+    const id = link.getAttribute('href');
+    if (id.length <= 1) return;
+    const target = document.querySelector(id);
+    if (!target) return;
+    evt.preventDefault();
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function gtInitLightbox() {
+  function gtHandleGallery(evt) {
+    const zoomTrigger = evt.target.closest('[data-zoom]');
     const lb = $('#gt-lightbox');
-    if (!lb) return;
-    $$('#gallery [data-zoom]').forEach(img => img.addEventListener('click', () => {
-      lb.querySelector('img').src = img.src;
+    if (zoomTrigger && lb) {
+      lb.querySelector('img').src = zoomTrigger.getAttribute('src');
       lb.classList.add('show');
-    }));
-    lb.addEventListener('click', () => lb.classList.remove('show'));
+      lb.setAttribute('aria-hidden', 'false');
+    }
+    if (evt.target === lb && lb.classList.contains('show')) {
+      lb.classList.remove('show');
+      lb.setAttribute('aria-hidden', 'true');
+    }
   }
 
   const gtModal = $('#gt-config-modal');
   function gtOpenModal(tierKey) {
+    if (!gtModal) return;
     gtState.openTier = tierKey;
     gtState.service = 'full';
     gtState.vehicle = null;
@@ -541,12 +546,21 @@
     gtUpdatePrice();
     gtModal.classList.add('show');
     gtModal.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('noscroll');
+    if (document.body) document.body.classList.add('noscroll');
   }
   function gtCloseModal() {
+    if (!gtModal) return;
     gtModal.classList.remove('show');
     gtModal.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('noscroll');
+    if (document.body) document.body.classList.remove('noscroll');
+  }
+
+  if (gtModal) {
+    gtModal.addEventListener('click', evt => {
+      if (evt.target === gtModal) {
+        gtCloseModal();
+      }
+    });
   }
 
   function gtRenderIncludes() {
@@ -716,21 +730,43 @@
     navigator.clipboard.writeText(text).then(() => alert('Summary copied!'));
   }
 
-  function gtInit() {
-    $('#gt-year').textContent = new Date().getFullYear();
-    gtSmoothAnchors();
-    gtInitLightbox();
-    $$('[data-open-config]').forEach(btn => btn.addEventListener('click', e => {
-      const card = e.target.closest('.gt-tier');
-      if (!card) return;
-      gtOpenModal(card.getAttribute('data-tier'));
-    }));
-    const callBtn = $('#gt-tap-call');
+  function gtHydrateStatic(root = document) {
+    const year = root.getElementById ? root.getElementById('gt-year') : $('#gt-year', root);
+    if (year) year.textContent = new Date().getFullYear();
+    const callBtn = root.getElementById ? root.getElementById('gt-tap-call') : $('#gt-tap-call', root);
     if (callBtn) callBtn.href = `tel:${GT_COMPANY.phone.replace(/[^+\d]/g,'')}`;
-    $$('#faq .q').forEach(q => q.addEventListener('click', () => q.classList.toggle('open')));
   }
 
-  document.addEventListener('DOMContentLoaded', gtInit);
+  document.addEventListener('click', gtSmoothAnchors);
+  document.addEventListener('click', gtHandleGallery);
+  document.addEventListener('click', evt => {
+    const faqQuestion = evt.target.closest('#faq .q');
+    if (faqQuestion) {
+      faqQuestion.classList.toggle('open');
+    }
+  });
+  document.addEventListener('click', evt => {
+    const btn = evt.target.closest('[data-open-config]');
+    if (!btn) return;
+    evt.preventDefault();
+    const card = btn.closest('.gt-tier');
+    if (!card) return;
+    gtOpenModal(card.getAttribute('data-tier'));
+  });
+  document.addEventListener('keydown', evt => {
+    if (evt.key === 'Escape') {
+      gtCloseModal();
+      const lb = $('#gt-lightbox');
+      if (lb) {
+        lb.classList.remove('show');
+        lb.setAttribute('aria-hidden', 'true');
+      }
+    }
+  });
+
+  gtHydrateStatic();
+  document.addEventListener('shopify:section:load', evt => gtHydrateStatic(evt.target || document));
+  document.addEventListener('shopify:section:select', evt => gtHydrateStatic(evt.target || document));
   </script>
 
   <script type="application/ld+json">{
