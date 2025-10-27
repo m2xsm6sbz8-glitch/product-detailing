@@ -111,8 +111,8 @@
   .gt-faq-item.open .gt-faq-question .icon { transform: rotate(45deg); }
   .gt-faq-answer { padding: 0 18px 16px 18px; color: #a7b0bd; display: none; }
   .gt-faq-item.open .gt-faq-answer { display: block; }
-  .gt-form-row { margin: 12px 0; }
-  .gt-form-row label { display: block; font-size: 0.9rem; margin-bottom: 8px; color: #a7b0bd; }
+  .gt-form-row { margin: 12px 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .gt-form-row label { display: inline-flex; font-size: 0.9rem; margin: 0; color: #a7b0bd; }
   .gt-select, .gt-radio-list, .gt-checkbox-list { display: grid; gap: 10px; }
   .gt-input, .gt-textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: #0e1118; color: #f6f8ff; }
   .gt-inline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -534,12 +534,26 @@
     gtUpdateNavCondensed();
   }
 
+  let gtNavWasCondensed = false;
   function gtUpdateNavCondensed() {
     if (!gtNav) return;
     const isMobile = window.innerWidth <= 760;
     const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
-    const shouldCondense = isMobile && window.scrollY > 40 && !menuOpen;
-    gtNav.classList.toggle('is-condensed', shouldCondense);
+    if (!isMobile || menuOpen) {
+      gtNav.classList.remove('is-condensed');
+      gtNavWasCondensed = false;
+      return;
+    }
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const condenseThreshold = 120;
+    const releaseThreshold = 40;
+    if (!gtNavWasCondensed && scrollY > condenseThreshold) {
+      gtNav.classList.add('is-condensed');
+      gtNavWasCondensed = true;
+    } else if (gtNavWasCondensed && scrollY < releaseThreshold) {
+      gtNav.classList.remove('is-condensed');
+      gtNavWasCondensed = false;
+    }
   }
 
   function gtSmoothAnchors(evt) {
@@ -901,5 +915,6 @@
   ]
 }
 {% endschema %}
+
 
 
