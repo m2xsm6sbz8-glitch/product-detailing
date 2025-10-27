@@ -96,9 +96,14 @@
   .gt-testimonials { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
   @media (max-width: 980px) { .gt-testimonials { grid-template-columns: 1fr; } }
   .gt-testimonial { padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
-  .gt-faq .q { border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; background: rgba(255,255,255,0.06); padding: 14px; cursor: pointer; margin-top: 12px; }
-  .gt-faq .a { display: none; padding: 10px 12px; color: #a7b0bd; }
-  .gt-faq .q.open + .a { display: block; }
+  .gt-faq { display: grid; gap: 12px; }
+  .gt-faq-item { border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; background: rgba(255,255,255,0.06); overflow: hidden; }
+  .gt-faq-question { width: 100%; background: transparent; border: none; color: inherit; text-align: left; padding: 14px 18px; font: inherit; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
+  .gt-faq-question:focus-visible { outline: 2px solid rgba(0,194,255,0.7); outline-offset: -2px; }
+  .gt-faq-question .icon { flex-shrink: 0; transition: transform 0.2s ease; }
+  .gt-faq-item.open .gt-faq-question .icon { transform: rotate(45deg); }
+  .gt-faq-answer { padding: 0 18px 16px 18px; color: #a7b0bd; display: none; }
+  .gt-faq-item.open .gt-faq-answer { display: block; }
   .gt-form-row { margin: 12px 0; }
   .gt-form-row label { display: block; font-size: 0.9rem; margin-bottom: 8px; color: #a7b0bd; }
   .gt-select, .gt-radio-list, .gt-checkbox-list { display: grid; gap: 10px; }
@@ -329,14 +334,42 @@
   <section class="gt-container" id="faq" style="margin-top:34px;">
     <h2 class="gt-section-title">FAQ</h2>
     <div class="gt-faq">
-      <div class="q">Do I need to be home during the appointment?</div>
-      <div class="a">Not necessarily—just ensure we have access to the vehicle and enough space to work safely.</div>
-      <div class="q">What if I can’t supply water &amp; electricity?</div>
-      <div class="a">We’re fully mobile, but sharing both unlocks a complimentary surprise add-on as a thank-you.</div>
-      <div class="q">How do you handle oversized vehicles?</div>
-      <div class="a">Each tier has a transparent surcharge for SUVs/Trucks and Oversized vehicles. The configurator calculates totals instantly before you book.</div>
-      <div class="q">Which payments do you accept?</div>
-      <div class="a">We accept major cards, Cash App, Zelle, and contactless payments once service is complete.</div>
+      <div class="gt-faq-item">
+        <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a1">
+          Do I need to be home during the appointment?
+          <span class="icon">＋</span>
+        </button>
+        <div class="gt-faq-answer" id="gt-faq-a1" hidden>
+          Placeholder copy for this answer. Replace with final FAQ content that reassures customers about attendance requirements.
+        </div>
+      </div>
+      <div class="gt-faq-item">
+        <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a2">
+          What if I can’t supply water &amp; electricity?
+          <span class="icon">＋</span>
+        </button>
+        <div class="gt-faq-answer" id="gt-faq-a2" hidden>
+          Placeholder copy for this answer. Update with guidance about utility requirements and any thank-you bonuses you offer.
+        </div>
+      </div>
+      <div class="gt-faq-item">
+        <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a3">
+          How do you handle oversized vehicles?
+          <span class="icon">＋</span>
+        </button>
+        <div class="gt-faq-answer" id="gt-faq-a3" hidden>
+          Placeholder copy for this answer. Add details about pricing tiers and any surcharges for large vehicles.
+        </div>
+      </div>
+      <div class="gt-faq-item">
+        <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a4">
+          Which payments do you accept?
+          <span class="icon">＋</span>
+        </button>
+        <div class="gt-faq-answer" id="gt-faq-a4" hidden>
+          Placeholder copy for this answer. Mention accepted payment methods and when payment is collected.
+        </div>
+      </div>
     </div>
   </section>
 
@@ -741,8 +774,7 @@
       '',
       'Notes:',
       notes || '—'
-    ].join('
-'));
+    ].join('\\n'));
     window.location.href = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${body}`;
     return false;
   }
@@ -765,12 +797,7 @@
 
   document.addEventListener('click', gtSmoothAnchors);
   document.addEventListener('click', gtHandleGallery);
-  document.addEventListener('click', evt => {
-    const faqQuestion = evt.target.closest('#faq .q');
-    if (faqQuestion) {
-      faqQuestion.classList.toggle('open');
-    }
-  });
+    ].join('\\n'));
   document.addEventListener('click', evt => {
     const btn = evt.target.closest('[data-open-config]');
     if (!btn) return;
@@ -820,3 +847,4 @@
   ]
 }
 {% endschema %}
+
