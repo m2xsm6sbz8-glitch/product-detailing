@@ -353,36 +353,36 @@
           Do I need to be home during the appointment?
           <span class="icon">＋</span>
         </button>
-        <div class="gt-faq-answer" id="gt-faq-a1" hidden>␊
+        <div class="gt-faq-answer" id="gt-faq-a1" hidden>
           We only need access to your keys and the vehicle. Most clients head inside or continue working while we detail. We will text when we arrive and before we leave, and we lock up when we are finished.
-        </div>␊
+        </div>
       </div>
       <div class="gt-faq-item">
         <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a2">
           What if I can’t supply water &amp; electricity?
           <span class="icon">＋</span>
         </button>
-        <div class="gt-faq-answer" id="gt-faq-a2" hidden>␊
+        <div class="gt-faq-answer" id="gt-faq-a2" hidden>
           We carry a water tank and quiet generator for locations without hookups. If you can share water and power we unlock a surprise bonus add-on as a thank-you, but service is never declined for lack of utilities.
-        </div>␊
+        </div>
       </div>
       <div class="gt-faq-item">
         <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a3">
           How do you handle oversized vehicles?
           <span class="icon">＋</span>
         </button>
-        <div class="gt-faq-answer" id="gt-faq-a3" hidden>␊
+        <div class="gt-faq-answer" id="gt-faq-a3" hidden>
           Oversized SUVs, trucks, and vans are welcome. Pricing follows the table above—expect a $20–$50 adjustment depending on the package so we can schedule the extra time and supplies needed for the larger footprint.
-        </div>␊
+        </div>
       </div>
       <div class="gt-faq-item">
         <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a4">
           Which payments do you accept?
           <span class="icon">＋</span>
         </button>
-        <div class="gt-faq-answer" id="gt-faq-a4" hidden>␊
+        <div class="gt-faq-answer" id="gt-faq-a4" hidden>
           Payment is collected once you approve the final walk-through. We accept cash, credit/debit cards, Zelle, and Apple Pay—no deposits required for standard appointments.
-        </div>␊
+        </div>
       </div>
     </div>
   </section>
@@ -578,24 +578,24 @@
     gtUpdateNavCondensed();
   }
 
-  let gtNavWasCondensed = false;␊
-  function gtUpdateNavCondensed() {␊
-    if (!gtNav) return;␊
-    const isMobile = window.innerWidth <= 760;␊
-    const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');␊
+  let gtNavWasCondensed = false;
+  function gtUpdateNavCondensed() {
+    if (!gtNav) return;
+    const isMobile = window.innerWidth <= 760;
+    const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
     let collapse = 0;
-    if (isMobile && !menuOpen) {␊
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;␊
-      const condenseThreshold = 120;␊
+    if (isMobile && !menuOpen) {
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      const condenseThreshold = 120;
       collapse = scrollY >= condenseThreshold ? 1 : 0;
-    }␊
+    }
     gtNav.style.setProperty('--nav-collapse', collapse.toFixed(3));
     const shouldCondense = isMobile && !menuOpen && collapse === 1;
-    if (shouldCondense !== gtNavWasCondensed) {␊
-      gtNav.classList.toggle('is-condensed', shouldCondense);␊
-      gtNavWasCondensed = shouldCondense;␊
-    }␊
-  }␊
+    if (shouldCondense !== gtNavWasCondensed) {
+      gtNav.classList.toggle('is-condensed', shouldCondense);
+      gtNavWasCondensed = shouldCondense;
+    }
+  }
 
   function gtSmoothAnchors(evt) {
     const link = evt.target.closest('a[href^="#"]');
@@ -961,6 +961,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
