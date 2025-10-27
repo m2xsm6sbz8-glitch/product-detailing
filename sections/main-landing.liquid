@@ -45,17 +45,25 @@
   .gt-col-6 { grid-column: span 6; }
   .gt-col-8 { grid-column: span 8; }
   .gt-col-12 { grid-column: span 12; }
-  @media (max-width: 980px) {
-    .gt-col-4, .gt-col-6, .gt-col-8 { grid-column: span 12; }
-    .gt-hero-inner { grid-template-columns: 1fr !important; }
-    .gt-nav-links { justify-content: center; }
-  }
+    @media (max-width: 980px) {
+      .gt-col-4, .gt-col-6, .gt-col-8 { grid-column: span 12; }
+      .gt-hero-inner { grid-template-columns: 1fr !important; }
+      .gt-nav-links { justify-content: center; }
+    }
+    @media (max-width: 760px) {
+      .gt-nav-inner { flex-wrap: nowrap; align-items: flex-start; }
+      .gt-nav-toggle { display: inline-flex; }
+      .gt-nav-links { display: none; flex-direction: column; width: 100%; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.12); }
+      .gt-nav-links.show { display: flex; }
+      .gt-nav-links a { padding: 6px 0; }
+    }
   .gt-muted { color: #a7b0bd; }
   .gt-section-title { margin: 0 0 6px; font-size: clamp(22px, 4vw, 34px); }
   .gt-nav { position: sticky; top: 0; z-index: 60; background: rgba(11,14,19,0.7); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.12); }
-  .gt-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
-  .gt-brand { font-weight: 900; letter-spacing: 0.4px; font-size: clamp(20px,4vw,28px); display: inline-flex; gap: 0.6rem; align-items: center; }
-  .gt-nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
+    .gt-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .gt-nav-toggle { display: none; align-items: center; gap: 0.35rem; padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: inherit; font-weight: 700; cursor: pointer; }
+    .gt-brand { font-weight: 900; letter-spacing: 0.4px; font-size: clamp(20px,4vw,28px); display: inline-flex; gap: 0.6rem; align-items: center; }
+    .gt-nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
   .gt-hero { padding: 70px 0 46px; }
   .gt-hero-inner { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: center; }
   .gt-swoosh { height: 280px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12);
@@ -122,7 +130,8 @@
   <nav class="gt-nav">
     <div class="gt-container gt-nav-inner">
       <div class="gt-brand">Gleam <span class="gt-chip">Mobile Detailing</span></div>
-      <div class="gt-nav-links">
+      <button class="gt-nav-toggle" id="gt-nav-toggle" type="button" aria-expanded="false" aria-controls="gt-nav-links">☰ Menu</button>
+      <div class="gt-nav-links" id="gt-nav-links">
         <a href="#packages">Packages</a>
         <a href="#addons">Add-ons</a>
         <a href="#gallery">Gallery</a>
@@ -474,6 +483,14 @@
   const $ = (q, el = document) => el.querySelector(q);
   const $$ = (q, el = document) => Array.from(el.querySelectorAll(q));
   const gtMoney = n => (n === null || Number.isNaN(n)) ? '—' : `$${n.toFixed(0)}`;
+  const gtNavLinks = $('#gt-nav-links');
+  const gtNavToggle = $('#gt-nav-toggle');
+
+  function gtCloseNavMenu() {
+    if (!gtNavLinks || !gtNavToggle) return;
+    gtNavLinks.classList.remove('show');
+    gtNavToggle.setAttribute('aria-expanded', 'false');
+  }
 
   function gtSmoothAnchors(evt) {
     const link = evt.target.closest('a[href^="#"]');
@@ -483,6 +500,7 @@
     const target = document.querySelector(id);
     if (!target) return;
     evt.preventDefault();
+    gtCloseNavMenu();
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -499,6 +517,18 @@
       lb.setAttribute('aria-hidden', 'true');
     }
   }
+
+  if (gtNavToggle && gtNavLinks) {
+    gtNavToggle.addEventListener('click', () => {
+      const isOpen = gtNavLinks.classList.toggle('show');
+      gtNavToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+  }
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 760) {
+      gtCloseNavMenu();
+    }
+  });
 
   const gtModal = $('#gt-config-modal');
   function gtOpenModal(tierKey) {
@@ -672,18 +702,14 @@
       `Estimated Total: ${gtMoney(gtState.total)}`
     ];
     const inclusionSections = [];
-    if (gtState.service === 'exterior' || gtState.service === 'full') inclusionSections.push('Inclusions — Exterior:
-• ' + tier.includes.exterior.join('
-• '));
-    if (gtState.service === 'interior' || gtState.service === 'full') inclusionSections.push('Inclusions — Interior:
-• ' + tier.includes.interior.join('
-• '));
-    $('#gt-selection-summary').textContent = summaryParts.join('
-') + (inclusionSections.length ? '
-
-' + inclusionSections.join('
-
-') : '');
+    if (gtState.service === 'exterior' || gtState.service === 'full') {
+      inclusionSections.push(`Inclusions — Exterior:\n• ${tier.includes.exterior.join('\n• ')}`);
+    }
+    if (gtState.service === 'interior' || gtState.service === 'full') {
+      inclusionSections.push(`Inclusions — Interior:\n• ${tier.includes.interior.join('\n• ')}`);
+    }
+    const summaryText = summaryParts.join('\n') + (inclusionSections.length ? `\n\n${inclusionSections.join('\n\n')}` : '');
+    $('#gt-selection-summary').textContent = summaryText;
     $('#gt-price-chip').textContent = `Total: ${gtMoney(gtState.total)}`;
     gtCloseModal();
     const booking = document.getElementById('booking');
