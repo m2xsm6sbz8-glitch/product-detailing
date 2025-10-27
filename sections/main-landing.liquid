@@ -528,6 +528,39 @@
   const gtNav = $('.gt-nav');
   const gtNavLinks = $('#gt-nav-links');
   const gtNavToggle = $('#gt-nav-toggle');
+  let gtTouchMoved = false;
+
+  document.addEventListener('touchstart', () => { gtTouchMoved = false; }, { passive: true });
+  document.addEventListener('touchmove', () => { gtTouchMoved = true; }, { passive: true });
+  document.addEventListener('touchcancel', () => { gtTouchMoved = false; }, { passive: true });
+  if (window.PointerEvent) {
+    let gtTouchPointerActive = false;
+    document.addEventListener('pointerdown', evt => {
+      if (evt.pointerType === 'touch') {
+        gtTouchPointerActive = true;
+        gtTouchMoved = false;
+      }
+    }, { passive: true });
+    document.addEventListener('pointermove', evt => {
+      if (gtTouchPointerActive && evt.pointerType === 'touch') {
+        gtTouchMoved = true;
+      }
+    }, { passive: true });
+    const gtResetPointerTouch = () => {
+      gtTouchPointerActive = false;
+    };
+    document.addEventListener('pointerup', evt => {
+      if (evt.pointerType === 'touch') {
+        gtResetPointerTouch();
+      }
+    }, { passive: true });
+    document.addEventListener('pointercancel', evt => {
+      if (evt.pointerType === 'touch') {
+        gtResetPointerTouch();
+        gtTouchMoved = false;
+      }
+    }, { passive: true });
+  }
 
   function gtCloseNavMenu() {
     if (!gtNavLinks || !gtNavToggle) return;
@@ -561,6 +594,10 @@
   function gtSmoothAnchors(evt) {
     const link = evt.target.closest('a[href^="#"]');
     if (!link || link.getAttribute('href') === '#') return;
+    if (gtTouchMoved) {
+      gtTouchMoved = false;
+      return;
+    }
     const id = link.getAttribute('href');
     if (id.length <= 1) return;
     const target = document.querySelector(id);
@@ -917,6 +954,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
