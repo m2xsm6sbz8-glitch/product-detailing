@@ -56,13 +56,20 @@
       .gt-nav-links { display: none; flex-direction: column; width: 100%; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.12); }
       .gt-nav-links.show { display: flex; }
       .gt-nav-links a { padding: 6px 0; }
+      .gt-nav.is-condensed .gt-nav-links { display: none !important; }
+      .gt-nav.is-condensed .gt-nav-toggle { padding: 6px 10px; font-size: 0.85rem; }
+      .gt-nav.is-condensed .gt-chip { font-size: 0.75rem; padding-block: 4px; }
     }
   .gt-muted { color: #a7b0bd; }
   .gt-section-title { margin: 0 0 6px; font-size: clamp(22px, 4vw, 34px); }
-  .gt-nav { position: sticky; top: 0; z-index: 60; background: rgba(11,14,19,0.7); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.12); }
-    .gt-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+  .gt-nav { position: sticky; top: 0; z-index: 60; background: rgba(11,14,19,0.7); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.12); transition: padding 0.25s ease, background 0.25s ease; }
+    .gt-nav .gt-container { padding-block: 20px; transition: padding 0.25s ease; }
+    .gt-nav.is-condensed .gt-container { padding-block: 10px; }
+    .gt-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; transition: gap 0.25s ease; }
+    .gt-nav.is-condensed .gt-nav-inner { gap: 8px; }
     .gt-nav-toggle { display: none; align-items: center; gap: 0.35rem; padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: inherit; font-weight: 700; cursor: pointer; }
-    .gt-brand { font-weight: 900; letter-spacing: 0.4px; font-size: clamp(20px,4vw,28px); display: inline-flex; gap: 0.6rem; align-items: center; }
+    .gt-brand { font-weight: 900; letter-spacing: 0.4px; font-size: clamp(20px,4vw,28px); display: inline-flex; gap: 0.6rem; align-items: center; transition: font-size 0.25s ease; }
+    .gt-nav.is-condensed .gt-brand { font-size: clamp(18px,4.6vw,24px); }
     .gt-nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
   .gt-hero { padding: 70px 0 46px; }
   .gt-hero-inner { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: center; }
@@ -339,36 +346,36 @@
           Do I need to be home during the appointment?
           <span class="icon">＋</span>
         </button>
-        <div class="gt-faq-answer" id="gt-faq-a1" hidden>
-          Placeholder copy for this answer. Replace with final FAQ content that reassures customers about attendance requirements.
-        </div>
+        <div class="gt-faq-answer" id="gt-faq-a1" hidden>␊
+          We only need access to your keys and the vehicle. Most clients head inside or continue working while we detail. We will text when we arrive and before we leave, and we lock up when we are finished.
+        </div>␊
       </div>
       <div class="gt-faq-item">
         <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a2">
           What if I can’t supply water &amp; electricity?
           <span class="icon">＋</span>
         </button>
-        <div class="gt-faq-answer" id="gt-faq-a2" hidden>
-          Placeholder copy for this answer. Update with guidance about utility requirements and any thank-you bonuses you offer.
-        </div>
+        <div class="gt-faq-answer" id="gt-faq-a2" hidden>␊
+          We carry a water tank and quiet generator for locations without hookups. If you can share water and power we unlock a surprise bonus add-on as a thank-you, but service is never declined for lack of utilities.
+        </div>␊
       </div>
       <div class="gt-faq-item">
         <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a3">
           How do you handle oversized vehicles?
           <span class="icon">＋</span>
         </button>
-        <div class="gt-faq-answer" id="gt-faq-a3" hidden>
-          Placeholder copy for this answer. Add details about pricing tiers and any surcharges for large vehicles.
-        </div>
+        <div class="gt-faq-answer" id="gt-faq-a3" hidden>␊
+          Oversized SUVs, trucks, and vans are welcome. Pricing follows the table above—expect a $20–$50 adjustment depending on the package so we can schedule the extra time and supplies needed for the larger footprint.
+        </div>␊
       </div>
       <div class="gt-faq-item">
         <button class="gt-faq-question" type="button" data-faq-toggle aria-expanded="false" aria-controls="gt-faq-a4">
           Which payments do you accept?
           <span class="icon">＋</span>
         </button>
-        <div class="gt-faq-answer" id="gt-faq-a4" hidden>
-          Placeholder copy for this answer. Mention accepted payment methods and when payment is collected.
-        </div>
+        <div class="gt-faq-answer" id="gt-faq-a4" hidden>␊
+          Payment is collected once you approve the final walk-through. We accept cash, credit/debit cards, Zelle, and Apple Pay—no deposits required for standard appointments.
+        </div>␊
       </div>
     </div>
   </section>
@@ -516,6 +523,7 @@
   const $ = (q, el = document) => el.querySelector(q);
   const $$ = (q, el = document) => Array.from(el.querySelectorAll(q));
   const gtMoney = n => (n === null || Number.isNaN(n)) ? '—' : `$${n.toFixed(0)}`;
+  const gtNav = $('.gt-nav');
   const gtNavLinks = $('#gt-nav-links');
   const gtNavToggle = $('#gt-nav-toggle');
 
@@ -523,6 +531,15 @@
     if (!gtNavLinks || !gtNavToggle) return;
     gtNavLinks.classList.remove('show');
     gtNavToggle.setAttribute('aria-expanded', 'false');
+    gtUpdateNavCondensed();
+  }
+
+  function gtUpdateNavCondensed() {
+    if (!gtNav) return;
+    const isMobile = window.innerWidth <= 760;
+    const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
+    const shouldCondense = isMobile && window.scrollY > 40 && !menuOpen;
+    gtNav.classList.toggle('is-condensed', shouldCondense);
   }
 
   function gtSmoothAnchors(evt) {
@@ -555,13 +572,20 @@
     gtNavToggle.addEventListener('click', () => {
       const isOpen = gtNavLinks.classList.toggle('show');
       gtNavToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      if (!isOpen) {
+        gtUpdateNavCondensed();
+      } else if (gtNav) {
+        gtNav.classList.remove('is-condensed');
+      }
     });
   }
   window.addEventListener('resize', () => {
     if (window.innerWidth > 760) {
       gtCloseNavMenu();
     }
+    gtUpdateNavCondensed();
   });
+  window.addEventListener('scroll', gtUpdateNavCondensed);
 
   const gtModal = $('#gt-config-modal');
   function gtOpenModal(tierKey) {
@@ -683,7 +707,8 @@
     const subtotal = base + surcharge + addonsTotal;
     gtState.total = subtotal;
     const rows = [];
-    const baseLabel = gtState.vehicle ? `Base (${tier.name} · ${gtLabelService(gtState.service)} · Sedan)` : `Base (${tier.name} · ${gtLabelService(gtState.service)})`;
+    const vehicleLabel = gtState.vehicle ? ` · ${gtLabelVehicle(gtState.vehicle)}` : '';
+    const baseLabel = `Base (${tier.name} · ${gtLabelService(gtState.service)}${vehicleLabel})`;
     rows.push(gtRow(baseLabel, base));
     if (surcharge > 0) rows.push(gtRow(`Vehicle surcharge (${gtLabelVehicle(gtState.vehicle)})`, surcharge));
     for (const a of priced) rows.push(gtRow(a.label, a.price));
@@ -797,14 +822,36 @@
 
   document.addEventListener('click', gtSmoothAnchors);
   document.addEventListener('click', gtHandleGallery);
-    ].join('\\n'));
   document.addEventListener('click', evt => {
-    const btn = evt.target.closest('[data-open-config]');
-    if (!btn) return;
-    evt.preventDefault();
-    const card = btn.closest('.gt-tier');
-    if (!card) return;
-    gtOpenModal(card.getAttribute('data-tier'));
+    const configBtn = evt.target.closest('[data-open-config]');
+    if (configBtn) {
+      evt.preventDefault();
+      const card = configBtn.closest('.gt-tier');
+      if (!card) return;
+      gtOpenModal(card.getAttribute('data-tier'));
+      return;
+    }
+    const faqBtn = evt.target.closest('[data-faq-toggle]');
+    if (faqBtn) {
+      evt.preventDefault();
+      const item = faqBtn.closest('.gt-faq-item');
+      if (!item) return;
+      const answerId = faqBtn.getAttribute('aria-controls');
+      const answer = answerId ? document.getElementById(answerId) : item.querySelector('.gt-faq-answer');
+      const willOpen = !item.classList.contains('open');
+      $$('.gt-faq-item').forEach(other => {
+        if (other === item) return;
+        other.classList.remove('open');
+        const otherBtn = other.querySelector('[data-faq-toggle]');
+        const otherAnswerId = otherBtn ? otherBtn.getAttribute('aria-controls') : null;
+        const otherAnswer = otherAnswerId ? document.getElementById(otherAnswerId) : other.querySelector('.gt-faq-answer');
+        if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+        if (otherAnswer) otherAnswer.hidden = true;
+      });
+      item.classList.toggle('open', willOpen);
+      faqBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      if (answer) answer.hidden = !willOpen;
+    }
   });
   document.addEventListener('keydown', evt => {
     if (evt.key === 'Escape') {
@@ -817,9 +864,16 @@
     }
   });
 
+  gtUpdateNavCondensed();
   gtHydrateStatic();
-  document.addEventListener('shopify:section:load', evt => gtHydrateStatic(evt.target || document));
-  document.addEventListener('shopify:section:select', evt => gtHydrateStatic(evt.target || document));
+  document.addEventListener('shopify:section:load', evt => {
+    gtHydrateStatic(evt.target || document);
+    gtUpdateNavCondensed();
+  });
+  document.addEventListener('shopify:section:select', evt => {
+    gtHydrateStatic(evt.target || document);
+    gtUpdateNavCondensed();
+  });
   </script>
 
   <script type="application/ld+json">{
@@ -847,4 +901,5 @@
   ]
 }
 {% endschema %}
+
 
