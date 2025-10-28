@@ -159,6 +159,8 @@
     </div>
   </nav>
 
+  <div class="gt-nav-sentinel" id="gt-nav-sentinel" aria-hidden="true"></div>
+
   <header class="gt-container gt-hero" id="hero">
     <div class="gt-hero-inner">
       <div class="gt-card" style="padding:22px;">
@@ -532,10 +534,29 @@
   const $$ = (q, el = document) => Array.from(el.querySelectorAll(q));
   const gtMoney = n => (n === null || Number.isNaN(n)) ? '—' : `$${n.toFixed(0)}`;
   const gtNav = $('.gt-nav');
+  const gtNavSentinel = $('#gt-nav-sentinel');
   const gtNavLinks = $('#gt-nav-links');
   const gtNavToggle = $('#gt-nav-toggle');
+  const GT_NAV_CONDENSE_START = 70;
+  const GT_NAV_CONDENSE_END = 170;
+  const GT_NAV_CONDENSE_RANGE = GT_NAV_CONDENSE_END - GT_NAV_CONDENSE_START;
+  const GT_NAV_RELEASE_THRESHOLD = 40;
   let gtNavWasCondensed = false;
   let gtTouchMoved = false;
+
+  function gtGetScrollPosition() {
+    const doc = document.documentElement;
+    const body = document.body;
+    const candidates = [
+      window.scrollY,
+      window.pageYOffset,
+      doc ? doc.scrollTop : 0,
+      body ? body.scrollTop : 0,
+      body ? -body.getBoundingClientRect().top : 0,
+      0
+    ];
+    return Math.max(...candidates.filter(n => typeof n === 'number' && !Number.isNaN(n)));
+  }
 
   document.addEventListener('touchstart', () => { gtTouchMoved = false; }, { passive: true });
   document.addEventListener('touchmove', () => { gtTouchMoved = true; }, { passive: true });
@@ -579,32 +600,33 @@
     if (!gtNav) return;
     const isMobile = window.innerWidth <= 760;
     const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
-    const scrollY = Math.max(0, window.scrollY || document.documentElement.scrollTop || 0);
     let collapse = 0;
+    let progressPx = 0;
 
     if (isMobile && !menuOpen) {
-      const condenseStart = 70;
-      const condenseEnd = 170;
-      if (scrollY <= condenseStart) {
-        collapse = 0;
-      } else if (scrollY >= condenseEnd) {
-        collapse = 1;
+      if (gtNavSentinel) {
+        const navHeight = gtNav.getBoundingClientRect().height;
+        const sentinelTop = gtNavSentinel.getBoundingClientRect().top;
+        progressPx = Math.max(0, Math.min(GT_NAV_CONDENSE_RANGE, (navHeight - sentinelTop) - GT_NAV_CONDENSE_START));
       } else {
-        collapse = (scrollY - condenseStart) / (condenseEnd - condenseStart);
+        const scrollY = gtGetScrollPosition();
+        if (scrollY <= GT_NAV_CONDENSE_START) {
+          progressPx = 0;
+        } else if (scrollY >= GT_NAV_CONDENSE_END) {
+          progressPx = GT_NAV_CONDENSE_RANGE;
+        } else {
+          progressPx = scrollY - GT_NAV_CONDENSE_START;
+        }
       }
-    }
-
-    if (!isMobile || menuOpen) {
-      collapse = 0;
+      collapse = Math.max(0, Math.min(1, GT_NAV_CONDENSE_RANGE ? (progressPx / GT_NAV_CONDENSE_RANGE) : 0));
     }
 
     gtNav.style.setProperty('--nav-collapse', collapse.toFixed(3));
 
     let shouldCondense = false;
     if (isMobile && !menuOpen) {
-      const releaseThreshold = 40;
       if (gtNavWasCondensed) {
-        shouldCondense = scrollY > releaseThreshold;
+        shouldCondense = progressPx > GT_NAV_RELEASE_THRESHOLD;
       } else {
         shouldCondense = collapse >= 0.95;
       }
@@ -989,6 +1011,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
