@@ -534,22 +534,6 @@
   const gtNav = $('.gt-nav');
   const gtNavLinks = $('#gt-nav-links');
   const gtNavToggle = $('#gt-nav-toggle');
-  const gtHero = $('#hero');
-  const gtSupportsObserver = typeof window !== 'undefined' && 'IntersectionObserver' in window;
-  let gtNavSentinel = null;
-  let gtNavSentinelCondense = false;
-  let gtNavCondenseStart = null;
-  let gtNavWasCondensed = false;
-  let gtTouchMoved = false;
-
-  const gtNav = $('.gt-nav');
-  const gtNavLinks = $('#gt-nav-links');
-  const gtNavToggle = $('#gt-nav-toggle');
-  const gtHero = $('#hero');
-  const gtSupportsObserver = typeof window !== 'undefined' && 'IntersectionObserver' in window;
-  let gtNavSentinel = null;
-  let gtNavSentinelCondense = false;
-  let gtNavCondenseStart = null;
   let gtNavWasCondensed = false;
   let gtTouchMoved = false;
 
@@ -591,14 +575,13 @@
     gtNavToggle.setAttribute('aria-expanded', 'false');
     gtUpdateNavCondensed();
   }
-
-  let gtNavWasCondensed = false;
   function gtUpdateNavCondensed() {
     if (!gtNav) return;
     const isMobile = window.innerWidth <= 760;
     const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
-    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const scrollY = Math.max(0, window.scrollY || document.documentElement.scrollTop || 0);
     let collapse = 0;
+
     if (isMobile && !menuOpen) {
       const condenseStart = 70;
       const condenseEnd = 170;
@@ -607,38 +590,7 @@
       } else if (scrollY >= condenseEnd) {
         collapse = 1;
       } else {
-  function gtUpdateNavCondensed() {
-    if (!gtNav) return;
-    const isMobile = window.innerWidth <= 760;
-    const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
-    const scrollY = Math.max(0, window.scrollY || document.documentElement.scrollTop || 0);
-    const usingSentinel = Boolean(gtHero && gtSupportsObserver);
-    let collapse = 0;
-
-    if (usingSentinel && !gtNavSentinelCondense) {
-      gtNavCondenseStart = null;
-    }
-
-    if (isMobile && !menuOpen) {
-      if (usingSentinel) {
-        if (gtNavSentinelCondense) {
-          if (gtNavCondenseStart === null) {
-            gtNavCondenseStart = scrollY;
-          }
-          const condenseRange = 140;
-          const delta = Math.max(0, scrollY - gtNavCondenseStart);
-          collapse = Math.min(1, delta / condenseRange);
-        }
-      } else {
-        const condenseStart = 70;
-        const condenseEnd = 170;
-        if (scrollY <= condenseStart) {
-          collapse = 0;
-        } else if (scrollY >= condenseEnd) {
-          collapse = 1;
-        } else {
-          collapse = (scrollY - condenseStart) / (condenseEnd - condenseStart);
-        }
+        collapse = (scrollY - condenseStart) / (condenseEnd - condenseStart);
       }
     }
 
@@ -650,27 +602,16 @@
 
     let shouldCondense = false;
     if (isMobile && !menuOpen) {
-      if (usingSentinel) {
-        if (!gtNavSentinelCondense) {
-          shouldCondense = false;
-        } else if (gtNavWasCondensed) {
-          shouldCondense = true;
-        } else {
-          shouldCondense = collapse >= 0.9;
-        }
+      const releaseThreshold = 40;
+      if (gtNavWasCondensed) {
+        shouldCondense = scrollY > releaseThreshold;
       } else {
-        const releaseThreshold = 40;
-        if (gtNavWasCondensed) {
-          shouldCondense = scrollY > releaseThreshold;
-        } else {
-          shouldCondense = collapse >= 0.95;
-        }
+        shouldCondense = collapse >= 0.95;
       }
     }
 
     gtNav.classList.toggle('is-condensed', shouldCondense && isMobile && !menuOpen);
     gtNavWasCondensed = isMobile && !menuOpen ? shouldCondense : false;
-  }
   }
 
   function gtHandleGallery(evt) {
@@ -696,9 +637,6 @@
       } else if (gtNav) {
         gtNav.classList.remove('is-condensed');
         gtNav.style.setProperty('--nav-collapse', '0');
-        if (gtHero && gtSupportsObserver) {
-          gtNavCondenseStart = null;
-        }
       }
     });
   }
@@ -706,15 +644,9 @@
     if (window.innerWidth > 760) {
       gtCloseNavMenu();
     }
-    if (gtHero && gtSupportsObserver) {
-      gtNavCondenseStart = null;
-    }
     gtUpdateNavCondensed();
   });
   window.addEventListener('orientationchange', () => {
-    if (gtHero && gtSupportsObserver) {
-      gtNavCondenseStart = null;
-    }
     setTimeout(gtUpdateNavCondensed, 50);
   });
   window.addEventListener('scroll', gtUpdateNavCondensed);
@@ -1033,6 +965,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
