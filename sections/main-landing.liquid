@@ -583,14 +583,29 @@
     if (!gtNav) return;
     const isMobile = window.innerWidth <= 760;
     const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
     let collapse = 0;
     if (isMobile && !menuOpen) {
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      const condenseThreshold = 120;
-      collapse = scrollY >= condenseThreshold ? 1 : 0;
+      const condenseStart = 70;
+      const condenseEnd = 170;
+      if (scrollY <= condenseStart) {
+        collapse = 0;
+      } else if (scrollY >= condenseEnd) {
+        collapse = 1;
+      } else {
+        collapse = (scrollY - condenseStart) / (condenseEnd - condenseStart);
+      }
     }
     gtNav.style.setProperty('--nav-collapse', collapse.toFixed(3));
-    const shouldCondense = isMobile && !menuOpen && collapse === 1;
+    let shouldCondense = false;
+    if (isMobile && !menuOpen) {
+      const releaseThreshold = 40;
+      if (gtNavWasCondensed) {
+        shouldCondense = scrollY > releaseThreshold;
+      } else {
+        shouldCondense = collapse >= 0.95;
+      }
+    }
     if (shouldCondense !== gtNavWasCondensed) {
       gtNav.classList.toggle('is-condensed', shouldCondense);
       gtNavWasCondensed = shouldCondense;
@@ -961,6 +976,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
