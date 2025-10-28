@@ -884,6 +884,30 @@
     if (callBtn) callBtn.href = `tel:${GT_COMPANY.phone.replace(/[^+\d]/g,'')}`;
   }
 
+  function gtSmoothAnchors(evt) {
+    if (gtTouchMoved) {
+      gtTouchMoved = false;
+      return;
+    }
+    const anchor = evt.target.closest('a[href^="#"]');
+    if (!anchor) return;
+    const href = anchor.getAttribute('href');
+    if (!href || href === '#' || anchor.hasAttribute('data-no-smooth')) return;
+    const id = href.slice(1);
+    if (!id) return;
+    const target = document.getElementById(id);
+    if (!target) return;
+    evt.preventDefault();
+    const navHeight = gtNav ? gtNav.getBoundingClientRect().height : 0;
+    const rect = target.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const offsetTop = rect.top + scrollTop - navHeight - 12;
+    window.scrollTo({ top: Math.max(0, offsetTop), behavior: 'smooth' });
+    if (gtNavLinks && gtNavLinks.classList.contains('show')) {
+      gtCloseNavMenu();
+    }
+  }
+
   document.addEventListener('click', gtSmoothAnchors);
   document.addEventListener('click', gtHandleGallery);
   document.addEventListener('click', evt => {
@@ -965,6 +989,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
