@@ -70,6 +70,7 @@
     .gt-nav .gt-chip { font-size: calc(0.85rem - 0.1rem * var(--nav-collapse)); padding-block: calc(6px - 2px * var(--nav-collapse)); transition: font-size 0.25s ease, padding 0.25s ease; }
     .gt-nav-links { display: flex; gap: 14px; flex-wrap: wrap; transition: gap 0.25s ease; }
   .gt-nav.is-condensed { --nav-collapse: 1; }
+  .gt-nav-sentinel { position: relative; width: 100%; height: 1px; margin-top: -1px; pointer-events: none; visibility: hidden; }
   .gt-hero { padding: 70px 0 46px; }
   .gt-hero-inner { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: center; }
   .gt-swoosh { height: 280px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12);
@@ -533,11 +534,24 @@
   const gtNav = $('.gt-nav');
   const gtNavLinks = $('#gt-nav-links');
   const gtNavToggle = $('#gt-nav-toggle');
+  const gtHero = $('#hero');
+  const gtSupportsObserver = typeof window !== 'undefined' && 'IntersectionObserver' in window;
+  let gtNavSentinel = null;
+  let gtNavSentinelCondense = false;
+  let gtNavCondenseStart = null;
+  let gtNavWasCondensed = false;
   let gtTouchMoved = false;
 
-  if (gtNav) {
-    gtNav.style.setProperty('--nav-collapse', '0');
-  }
+  const gtNav = $('.gt-nav');
+  const gtNavLinks = $('#gt-nav-links');
+  const gtNavToggle = $('#gt-nav-toggle');
+  const gtHero = $('#hero');
+  const gtSupportsObserver = typeof window !== 'undefined' && 'IntersectionObserver' in window;
+  let gtNavSentinel = null;
+  let gtNavSentinelCondense = false;
+  let gtNavCondenseStart = null;
+  let gtNavWasCondensed = false;
+  let gtTouchMoved = false;
 
   document.addEventListener('touchstart', () => { gtTouchMoved = false; }, { passive: true });
   document.addEventListener('touchmove', () => { gtTouchMoved = true; }, { passive: true });
@@ -593,39 +607,70 @@
       } else if (scrollY >= condenseEnd) {
         collapse = 1;
       } else {
-        collapse = (scrollY - condenseStart) / (condenseEnd - condenseStart);
+  function gtUpdateNavCondensed() {
+    if (!gtNav) return;
+    const isMobile = window.innerWidth <= 760;
+    const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
+    const scrollY = Math.max(0, window.scrollY || document.documentElement.scrollTop || 0);
+    const usingSentinel = Boolean(gtHero && gtSupportsObserver);
+    let collapse = 0;
+
+    if (usingSentinel && !gtNavSentinelCondense) {
+      gtNavCondenseStart = null;
+    }
+
+    if (isMobile && !menuOpen) {
+      if (usingSentinel) {
+        if (gtNavSentinelCondense) {
+          if (gtNavCondenseStart === null) {
+            gtNavCondenseStart = scrollY;
+          }
+          const condenseRange = 140;
+          const delta = Math.max(0, scrollY - gtNavCondenseStart);
+          collapse = Math.min(1, delta / condenseRange);
+        }
+      } else {
+        const condenseStart = 70;
+        const condenseEnd = 170;
+        if (scrollY <= condenseStart) {
+          collapse = 0;
+        } else if (scrollY >= condenseEnd) {
+          collapse = 1;
+        } else {
+          collapse = (scrollY - condenseStart) / (condenseEnd - condenseStart);
+        }
       }
     }
+
+    if (!isMobile || menuOpen) {
+      collapse = 0;
+    }
+
     gtNav.style.setProperty('--nav-collapse', collapse.toFixed(3));
+
     let shouldCondense = false;
     if (isMobile && !menuOpen) {
-      const releaseThreshold = 40;
-      if (gtNavWasCondensed) {
-        shouldCondense = scrollY > releaseThreshold;
+      if (usingSentinel) {
+        if (!gtNavSentinelCondense) {
+          shouldCondense = false;
+        } else if (gtNavWasCondensed) {
+          shouldCondense = true;
+        } else {
+          shouldCondense = collapse >= 0.9;
+        }
       } else {
-        shouldCondense = collapse >= 0.95;
+        const releaseThreshold = 40;
+        if (gtNavWasCondensed) {
+          shouldCondense = scrollY > releaseThreshold;
+        } else {
+          shouldCondense = collapse >= 0.95;
+        }
       }
     }
-    if (shouldCondense !== gtNavWasCondensed) {
-      gtNav.classList.toggle('is-condensed', shouldCondense);
-      gtNavWasCondensed = shouldCondense;
-    }
-  }
 
-  function gtSmoothAnchors(evt) {
-    const link = evt.target.closest('a[href^="#"]');
-    if (!link || link.getAttribute('href') === '#') return;
-    if (gtTouchMoved) {
-      gtTouchMoved = false;
-      return;
-    }
-    const id = link.getAttribute('href');
-    if (id.length <= 1) return;
-    const target = document.querySelector(id);
-    if (!target) return;
-    evt.preventDefault();
-    gtCloseNavMenu();
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    gtNav.classList.toggle('is-condensed', shouldCondense && isMobile && !menuOpen);
+    gtNavWasCondensed = isMobile && !menuOpen ? shouldCondense : false;
+  }
   }
 
   function gtHandleGallery(evt) {
@@ -651,6 +696,9 @@
       } else if (gtNav) {
         gtNav.classList.remove('is-condensed');
         gtNav.style.setProperty('--nav-collapse', '0');
+        if (gtHero && gtSupportsObserver) {
+          gtNavCondenseStart = null;
+        }
       }
     });
   }
@@ -658,7 +706,16 @@
     if (window.innerWidth > 760) {
       gtCloseNavMenu();
     }
+    if (gtHero && gtSupportsObserver) {
+      gtNavCondenseStart = null;
+    }
     gtUpdateNavCondensed();
+  });
+  window.addEventListener('orientationchange', () => {
+    if (gtHero && gtSupportsObserver) {
+      gtNavCondenseStart = null;
+    }
+    setTimeout(gtUpdateNavCondensed, 50);
   });
   window.addEventListener('scroll', gtUpdateNavCondensed);
 
@@ -976,6 +1033,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
