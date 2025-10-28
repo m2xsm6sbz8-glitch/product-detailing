@@ -542,6 +542,7 @@
   const GT_NAV_CONDENSE_RANGE = GT_NAV_CONDENSE_END - GT_NAV_CONDENSE_START;
   const GT_NAV_RELEASE_THRESHOLD = 40;
   let gtNavWasCondensed = false;
+  let gtNavLastCollapse = 0;
   let gtTouchMoved = false;
 
   function gtGetScrollPosition() {
@@ -604,24 +605,30 @@
     let progressPx = 0;
 
     if (isMobile && !menuOpen) {
-      if (gtNavSentinel) {
-        const navHeight = gtNav.getBoundingClientRect().height;
-        const sentinelTop = gtNavSentinel.getBoundingClientRect().top;
-        progressPx = Math.max(0, Math.min(GT_NAV_CONDENSE_RANGE, (navHeight - sentinelTop) - GT_NAV_CONDENSE_START));
+      const scrollY = gtGetScrollPosition();
+      if (scrollY <= GT_NAV_CONDENSE_START) {
+        progressPx = 0;
+      } else if (scrollY >= GT_NAV_CONDENSE_END) {
+        progressPx = GT_NAV_CONDENSE_RANGE;
       } else {
-        const scrollY = gtGetScrollPosition();
-        if (scrollY <= GT_NAV_CONDENSE_START) {
-          progressPx = 0;
-        } else if (scrollY >= GT_NAV_CONDENSE_END) {
-          progressPx = GT_NAV_CONDENSE_RANGE;
-        } else {
-          progressPx = scrollY - GT_NAV_CONDENSE_START;
-        }
+        progressPx = scrollY - GT_NAV_CONDENSE_START;
       }
+
+      if (gtNavSentinel) {
+        const navRect = gtNav.getBoundingClientRect();
+        const sentinelTop = gtNavSentinel.getBoundingClientRect().top;
+        const sentinelProgress = (navRect.bottom - sentinelTop) - GT_NAV_CONDENSE_START;
+        const normalizedSentinel = Math.max(0, Math.min(GT_NAV_CONDENSE_RANGE, sentinelProgress));
+        progressPx = Math.max(progressPx, normalizedSentinel);
+      }
+
       collapse = Math.max(0, Math.min(1, GT_NAV_CONDENSE_RANGE ? (progressPx / GT_NAV_CONDENSE_RANGE) : 0));
     }
 
-    gtNav.style.setProperty('--nav-collapse', collapse.toFixed(3));
+    if (Math.abs(collapse - gtNavLastCollapse) > 0.001) {
+      gtNav.style.setProperty('--nav-collapse', collapse.toFixed(3));
+      gtNavLastCollapse = collapse;
+    }
 
     let shouldCondense = false;
     if (isMobile && !menuOpen) {
@@ -1011,6 +1018,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
