@@ -9,6 +9,7 @@
     font: 16px/1.45 "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
     color: #f6f8ff;
     overflow-x: hidden;
+    overscroll-behavior-y: none;
   }
   .gt-theme *, .gt-theme *::before, .gt-theme *::after { box-sizing: border-box; }
   body.noscroll { overflow: hidden; }
@@ -19,6 +20,7 @@
       radial-gradient(900px 360px at 88% 0%, rgba(58, 141, 255, 0.1), transparent 55%),
       #0b0e13;
     color: #f6f8ff;
+    overscroll-behavior: contain;
   }
   .gt-theme a { color: #e4f0ff; }
   .gt-container { max-width: 1200px; margin: 0 auto; padding: 26px; }
@@ -544,6 +546,24 @@
   let gtNavWasCondensed = false;
   let gtNavLastCollapse = 0;
   let gtTouchMoved = false;
+  const gtRequestFrame = (typeof window !== 'undefined' && window.requestAnimationFrame)
+    ? window.requestAnimationFrame.bind(window)
+    : (cb => setTimeout(cb, 16));
+  let gtNavUpdateScheduled = false;
+
+  function gtScheduleNavUpdate(immediate = false) {
+    if (immediate) {
+      gtNavUpdateScheduled = false;
+      gtUpdateNavCondensed();
+      return;
+    }
+    if (gtNavUpdateScheduled) return;
+    gtNavUpdateScheduled = true;
+    gtRequestFrame(() => {
+      gtNavUpdateScheduled = false;
+      gtUpdateNavCondensed();
+    });
+  }
 
   function gtGetScrollPosition() {
     const doc = document.documentElement;
@@ -595,7 +615,7 @@
     if (!gtNavLinks || !gtNavToggle) return;
     gtNavLinks.classList.remove('show');
     gtNavToggle.setAttribute('aria-expanded', 'false');
-    gtUpdateNavCondensed();
+    gtScheduleNavUpdate(true);
   }
   function gtUpdateNavCondensed() {
     if (!gtNav) return;
@@ -662,7 +682,7 @@
       const isOpen = gtNavLinks.classList.toggle('show');
       gtNavToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
       if (!isOpen) {
-        gtUpdateNavCondensed();
+        gtScheduleNavUpdate(true);
       } else if (gtNav) {
         gtNav.classList.remove('is-condensed');
         gtNav.style.setProperty('--nav-collapse', '0');
@@ -673,12 +693,14 @@
     if (window.innerWidth > 760) {
       gtCloseNavMenu();
     }
-    gtUpdateNavCondensed();
+    gtScheduleNavUpdate();
   });
   window.addEventListener('orientationchange', () => {
-    setTimeout(gtUpdateNavCondensed, 50);
+    setTimeout(() => gtScheduleNavUpdate(true), 50);
   });
-  window.addEventListener('scroll', gtUpdateNavCondensed);
+  window.addEventListener('scroll', () => {
+    gtScheduleNavUpdate();
+  }, { passive: true });
 
   const gtModal = $('#gt-config-modal');
   function gtOpenModal(tierKey) {
@@ -985,11 +1007,11 @@
   gtHydrateStatic();
   document.addEventListener('shopify:section:load', evt => {
     gtHydrateStatic(evt.target || document);
-    gtUpdateNavCondensed();
+    gtScheduleNavUpdate(true);
   });
   document.addEventListener('shopify:section:select', evt => {
     gtHydrateStatic(evt.target || document);
-    gtUpdateNavCondensed();
+    gtScheduleNavUpdate(true);
   });
   </script>
 
@@ -1018,6 +1040,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
