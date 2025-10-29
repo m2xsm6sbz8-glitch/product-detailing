@@ -102,9 +102,31 @@
   .gt-addon { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
   .gt-addon.disabled { opacity: 0.45; filter: grayscale(1); position: relative; }
   .gt-addon.disabled::after { content: 'Unavailable'; font-size: 0.75rem; color: #f6f8ff; background: rgba(0,0,0,0.55); border-radius: 12px; padding: 4px 8px; align-self: flex-start; }
-  .gt-gallery { display: grid; grid-template-columns: repeat(12,1fr); gap: 10px; }
-  .gt-gallery img { width: 100%; height: 220px; object-fit: cover; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); cursor: zoom-in; }
-  @media (max-width: 980px) { .gt-gallery { grid-template-columns: repeat(6,1fr); } }
+  .gt-gallery-carousel { position: relative; margin-top: 20px; }
+  .gt-gallery-viewport { position: relative; overflow: hidden; border-radius: 18px; touch-action: pan-y; }
+  .gt-gallery-track { display: flex; width: 100%; transform: translateX(-100%); transition: transform 0.45s cubic-bezier(0.4, 0.12, 0.2, 1); }
+  .gt-gallery-slide { flex: 0 0 100%; padding: 0 8px; display: flex; justify-content: center; }
+  .gt-gallery-slide img { width: 100%; max-width: 640px; height: clamp(220px, 60vw, 360px); object-fit: cover; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); cursor: zoom-in; box-shadow: 0 18px 38px rgba(0,0,0,0.35); }
+  .gt-gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(11,14,19,0.7); border: 1px solid rgba(255,255,255,0.18); color: #f6f8ff; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; z-index: 2; backdrop-filter: blur(8px); }
+  .gt-gallery-nav:hover { background: rgba(11,14,19,0.9); transform: translateY(-50%) scale(1.04); }
+  .gt-gallery-nav:focus-visible { outline: 2px solid rgba(0,194,255,0.7); outline-offset: 2px; }
+  .gt-gallery-nav[data-gallery-prev] { left: 12px; }
+  .gt-gallery-nav[data-gallery-next] { right: 12px; }
+  .gt-gallery-dots { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+  .gt-gallery-dots button { width: 10px; height: 10px; border-radius: 50%; border: none; background: rgba(255,255,255,0.18); padding: 0; cursor: pointer; transition: transform 0.25s ease, background 0.25s ease; }
+  .gt-gallery-dots button.is-active { background: linear-gradient(90deg,#3a8dff,#00c2ff); transform: scale(1.25); }
+  .gt-gallery-dots button:focus-visible { outline: 2px solid rgba(0,194,255,0.6); outline-offset: 2px; }
+  @media (min-width: 900px) {
+    .gt-gallery-slide { padding: 0 12px; }
+    .gt-gallery-viewport { padding: 0 30px; }
+  }
+  @media (max-width: 720px) {
+    .gt-gallery-nav { width: 38px; height: 38px; }
+  }
+  @media (max-width: 560px) {
+    .gt-gallery-nav { display: none; }
+    .gt-gallery-viewport { border-radius: 16px; }
+  }
   .gt-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 90; }
   .gt-lightbox.show { display: flex; }
   .gt-lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); }
@@ -330,13 +352,20 @@
   <section class="gt-container" id="gallery" style="margin-top:34px;">
     <h2 class="gt-section-title">Before &amp; After Highlights</h2>
     <p class="gt-muted">A quick look at recent transformations.</p>
-    <div class="gt-gallery">
-      <img src="https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?q=80&w=1200&auto=format&fit=crop" alt="Foam cannon covering a sports car" data-zoom/>
-      <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200&auto=format&fit=crop" alt="SUV interior vacuuming" data-zoom/>
-      <img src="https://images.unsplash.com/photo-1623377646908-6b85b0d7bf78?q=80&w=1200&auto=format&fit=crop" alt="Wheel detailing with brush" data-zoom/>
-      <img src="https://images.unsplash.com/photo-1607853202273-797f1c22a38c?q=80&w=1200&auto=format&fit=crop" alt="Paint polishing for gloss" data-zoom/>
-      <img src="https://images.unsplash.com/photo-1593941707874-ef25b8b4a92e?q=80&w=1200&auto=format&fit=crop" alt="Clean SUV exterior" data-zoom/>
-      <img src="https://images.unsplash.com/photo-1574333751907-b7aef0b0848b?q=80&w=1200&auto=format&fit=crop" alt="Detailer drying vehicle with microfiber" data-zoom/>
+    <div class="gt-gallery-carousel" data-gallery>
+      <button class="gt-gallery-nav" type="button" aria-label="Previous highlight" data-gallery-prev>‹</button>
+      <div class="gt-gallery-viewport">
+        <div class="gt-gallery-track">
+          <figure class="gt-gallery-slide"><img src="https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?q=80&w=1200&auto=format&fit=crop" alt="Foam cannon covering a sports car" data-zoom/></figure>
+          <figure class="gt-gallery-slide"><img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200&auto=format&fit=crop" alt="SUV interior vacuuming" data-zoom/></figure>
+          <figure class="gt-gallery-slide"><img src="https://images.unsplash.com/photo-1623377646908-6b85b0d7bf78?q=80&w=1200&auto=format&fit=crop" alt="Wheel detailing with brush" data-zoom/></figure>
+          <figure class="gt-gallery-slide"><img src="https://images.unsplash.com/photo-1607853202273-797f1c22a38c?q=80&w=1200&auto=format&fit=crop" alt="Paint polishing for gloss" data-zoom/></figure>
+          <figure class="gt-gallery-slide"><img src="https://images.unsplash.com/photo-1593941707874-ef25b8b4a92e?q=80&w=1200&auto=format&fit=crop" alt="Clean SUV exterior" data-zoom/></figure>
+          <figure class="gt-gallery-slide"><img src="https://images.unsplash.com/photo-1574333751907-b7aef0b0848b?q=80&w=1200&auto=format&fit=crop" alt="Detailer drying vehicle with microfiber" data-zoom/></figure>
+        </div>
+      </div>
+      <button class="gt-gallery-nav" type="button" aria-label="Next highlight" data-gallery-next>›</button>
+      <div class="gt-gallery-dots"></div>
     </div>
   </section>
   <div class="gt-lightbox" id="gt-lightbox" aria-hidden="true" role="dialog"><img alt="Zoomed detailing photo"/></div>
@@ -677,6 +706,187 @@
     }
   }
 
+  function gtInitGalleryCarousel(root = document) {
+    const scope = root && root.querySelector ? root : document;
+    const carousel = scope.querySelector ? scope.querySelector('[data-gallery]') : $('[data-gallery]', scope);
+    if (!carousel || carousel.dataset.carouselReady === 'true') return;
+    const track = carousel.querySelector('.gt-gallery-track');
+    const viewport = carousel.querySelector('.gt-gallery-viewport');
+    const prevBtn = carousel.querySelector('[data-gallery-prev]');
+    const nextBtn = carousel.querySelector('[data-gallery-next]');
+    if (!track || !viewport) return;
+    const baseSlides = Array.from(track.children);
+    if (!baseSlides.length) return;
+    carousel.dataset.carouselReady = 'true';
+
+    if (baseSlides.length === 1) {
+      track.style.transform = 'translateX(0%)';
+      return;
+    }
+
+    const firstClone = baseSlides[0].cloneNode(true);
+    const lastClone = baseSlides[baseSlides.length - 1].cloneNode(true);
+    firstClone.dataset.clone = 'true';
+    lastClone.dataset.clone = 'true';
+    firstClone.setAttribute('aria-hidden', 'true');
+    lastClone.setAttribute('aria-hidden', 'true');
+    track.appendChild(firstClone);
+    track.insertBefore(lastClone, track.firstChild);
+
+    let index = 1;
+    let isSliding = false;
+    let isDragging = false;
+    let startX = 0;
+    let deltaX = 0;
+
+    const dotsWrapper = carousel.querySelector('.gt-gallery-dots');
+    let dots = [];
+    if (dotsWrapper) {
+      dotsWrapper.innerHTML = '';
+      baseSlides.forEach((_, idx) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.setAttribute('aria-label', `Go to highlight ${idx + 1}`);
+        dotsWrapper.appendChild(dot);
+      });
+      dots = Array.from(dotsWrapper.querySelectorAll('button'));
+    }
+
+    const totalSlides = baseSlides.length;
+
+    function getActiveIndex() {
+      return (index - 1 + totalSlides) % totalSlides;
+    }
+
+    function updateDots() {
+      if (!dots.length) return;
+      const active = getActiveIndex();
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('is-active', idx === active);
+      });
+    }
+
+    function updateSlideAria() {
+      const children = Array.from(track.children);
+      const active = getActiveIndex();
+      children.forEach((slide, idx) => {
+        if (slide.dataset.clone === 'true') return;
+        const realIndex = idx - 1;
+        slide.setAttribute('aria-hidden', realIndex === active ? 'false' : 'true');
+      });
+    }
+
+    function updatePosition(animate = true) {
+      if (!animate) {
+        track.style.transition = 'none';
+      }
+      track.style.transform = `translateX(${-index * 100}%)`;
+      updateDots();
+      updateSlideAria();
+      if (!animate) {
+        requestAnimationFrame(() => {
+          track.style.transition = '';
+        });
+      }
+    }
+
+    function goNext() {
+      if (isSliding) return;
+      isSliding = true;
+      index += 1;
+      updatePosition(true);
+    }
+
+    function goPrev() {
+      if (isSliding) return;
+      isSliding = true;
+      index -= 1;
+      updatePosition(true);
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', evt => {
+        evt.preventDefault();
+        goPrev();
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', evt => {
+        evt.preventDefault();
+        goNext();
+      });
+    }
+
+    if (dots.length) {
+      dots.forEach((dot, dotIndex) => {
+        dot.addEventListener('click', evt => {
+          evt.preventDefault();
+          if (isSliding) return;
+          const targetIndex = dotIndex + 1;
+          if (targetIndex === index) return;
+          isSliding = true;
+          index = targetIndex;
+          updatePosition(true);
+        });
+      });
+    }
+
+    function onPointerDown(evt) {
+      if (evt.pointerType === 'mouse' && evt.button !== 0) return;
+      isDragging = true;
+      startX = evt.clientX;
+      deltaX = 0;
+      track.style.transition = 'none';
+      viewport.setPointerCapture && viewport.setPointerCapture(evt.pointerId);
+    }
+
+    function onPointerMove(evt) {
+      if (!isDragging) return;
+      deltaX = evt.clientX - startX;
+      const percent = viewport.clientWidth ? (deltaX / viewport.clientWidth) * 100 : 0;
+      track.style.transform = `translateX(calc(${-index * 100}% + ${percent}%))`;
+    }
+
+    function onPointerUp(evt) {
+      if (!isDragging) return;
+      viewport.releasePointerCapture && viewport.releasePointerCapture(evt.pointerId);
+      track.style.transition = '';
+      const threshold = viewport.clientWidth * 0.18;
+      if (Math.abs(deltaX) > threshold) {
+        if (deltaX > 0) {
+          goPrev();
+        } else {
+          goNext();
+        }
+      } else {
+        updatePosition(true);
+      }
+      isDragging = false;
+      deltaX = 0;
+    }
+
+    viewport.addEventListener('pointerdown', onPointerDown);
+    viewport.addEventListener('pointermove', onPointerMove);
+    viewport.addEventListener('pointerup', onPointerUp);
+    viewport.addEventListener('pointercancel', onPointerUp);
+
+    track.addEventListener('transitionend', () => {
+      const current = track.children[index];
+      if (current && current.dataset.clone === 'true') {
+        index = index === 0 ? totalSlides : 1;
+        updatePosition(false);
+      }
+      isSliding = false;
+    });
+
+    window.addEventListener('resize', () => {
+      if (isDragging) return;
+      updatePosition(false);
+    });
+
+    updatePosition(false);
+  }
+
   if (gtNavToggle && gtNavLinks) {
     gtNavToggle.addEventListener('click', () => {
       const isOpen = gtNavLinks.classList.toggle('show');
@@ -1005,8 +1215,10 @@
 
   gtUpdateNavCondensed();
   gtHydrateStatic();
+  gtInitGalleryCarousel();
   document.addEventListener('shopify:section:load', evt => {
     gtHydrateStatic(evt.target || document);
+    gtInitGalleryCarousel(evt.target || document);
     gtScheduleNavUpdate(true);
   });
   document.addEventListener('shopify:section:select', evt => {
@@ -1040,4 +1252,5 @@
   ]
 }
 {% endschema %}
+
 
