@@ -566,6 +566,7 @@
   const gtMoney = n => (n === null || Number.isNaN(n)) ? '—' : `$${n.toFixed(0)}`;
   const gtNav = $('.gt-nav');
   const gtNavSentinel = $('#gt-nav-sentinel');
+  const gtHeroCard = document.querySelector('#hero .gt-card');
   const gtNavLinks = $('#gt-nav-links');
   const gtNavToggle = $('#gt-nav-toggle');
   const GT_NAV_CONDENSE_START = 70;
@@ -833,12 +834,12 @@
 
     function onPointerDown(evt) {
       if (evt.pointerType === 'mouse' && evt.button !== 0) return;
+      if (isSliding) return;
       isDragging = true;
       startX = evt.clientX;
       deltaX = 0;
       track.style.transition = 'none';
       viewport.setPointerCapture && viewport.setPointerCapture(evt.pointerId);
-    }
 
     function onPointerMove(evt) {
       if (!isDragging) return;
@@ -869,6 +870,7 @@
     viewport.addEventListener('pointermove', onPointerMove);
     viewport.addEventListener('pointerup', onPointerUp);
     viewport.addEventListener('pointercancel', onPointerUp);
+    viewport.addEventListener('pointerleave', onPointerUp);
 
     track.addEventListener('transitionend', () => {
       const current = track.children[index];
