@@ -654,6 +654,7 @@
     let progressPx = 0;
 
     if (isMobile && !menuOpen) {
+      const navRect = gtNav.getBoundingClientRect();
       const scrollY = gtGetScrollPosition();
       if (scrollY <= GT_NAV_CONDENSE_START) {
         progressPx = 0;
@@ -664,11 +665,22 @@
       }
 
       if (gtNavSentinel) {
-        const navRect = gtNav.getBoundingClientRect();
         const sentinelTop = gtNavSentinel.getBoundingClientRect().top;
         const sentinelProgress = (navRect.bottom - sentinelTop) - GT_NAV_CONDENSE_START;
         const normalizedSentinel = Math.max(0, Math.min(GT_NAV_CONDENSE_RANGE, sentinelProgress));
         progressPx = Math.max(progressPx, normalizedSentinel);
+      }
+
+      const heroSection = document.getElementById('hero');
+      const heroCard = heroSection ? heroSection.querySelector('.gt-card') : null;
+      if (heroCard) {
+        const heroRect = heroCard.getBoundingClientRect();
+        const overlap = navRect.bottom - heroRect.top;
+        if (overlap > 0) {
+          const navHeight = navRect.height || 1;
+          const normalizedOverlap = Math.max(0, Math.min(1, overlap / navHeight));
+          progressPx = Math.max(progressPx, normalizedOverlap * GT_NAV_CONDENSE_RANGE);
+        }
       }
 
       collapse = Math.max(0, Math.min(1, GT_NAV_CONDENSE_RANGE ? (progressPx / GT_NAV_CONDENSE_RANGE) : 0));
@@ -832,16 +844,20 @@
     }
 
     function onPointerDown(evt) {
+      if (evt.isPrimary === false) return;
       if (evt.pointerType === 'mouse' && evt.button !== 0) return;
+      if (isSliding) return;
       isDragging = true;
       startX = evt.clientX;
       deltaX = 0;
       track.style.transition = 'none';
-      viewport.setPointerCapture && viewport.setPointerCapture(evt.pointerId);
+      if (viewport.setPointerCapture) {
+        viewport.setPointerCapture(evt.pointerId);
+      }
     }
 
     function onPointerMove(evt) {
-      if (!isDragging) return;
+      if (!isDragging || evt.isPrimary === false) return;
       deltaX = evt.clientX - startX;
       const percent = viewport.clientWidth ? (deltaX / viewport.clientWidth) * 100 : 0;
       track.style.transform = `translateX(calc(${-index * 100}% + ${percent}%))`;
@@ -849,10 +865,15 @@
 
     function onPointerUp(evt) {
       if (!isDragging) return;
-      viewport.releasePointerCapture && viewport.releasePointerCapture(evt.pointerId);
+      const isCancel = evt.type === 'pointercancel' || evt.type === 'pointerleave';
+      if (viewport.releasePointerCapture) {
+        if (!viewport.hasPointerCapture || viewport.hasPointerCapture(evt.pointerId)) {
+          viewport.releasePointerCapture(evt.pointerId);
+        }
+      }
       track.style.transition = '';
       const threshold = viewport.clientWidth * 0.18;
-      if (Math.abs(deltaX) > threshold) {
+      if (!isCancel && Math.abs(deltaX) > threshold) {
         if (deltaX > 0) {
           goPrev();
         } else {
@@ -869,6 +890,7 @@
     viewport.addEventListener('pointermove', onPointerMove);
     viewport.addEventListener('pointerup', onPointerUp);
     viewport.addEventListener('pointercancel', onPointerUp);
+    viewport.addEventListener('pointerleave', onPointerUp);
 
     track.addEventListener('transitionend', () => {
       const current = track.children[index];
@@ -1252,3 +1274,4 @@
   ]
 }
 {% endschema %}
+
