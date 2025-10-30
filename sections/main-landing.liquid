@@ -104,7 +104,7 @@
   .gt-addon.disabled::after { content: 'Unavailable'; font-size: 0.75rem; color: #f6f8ff; background: rgba(0,0,0,0.55); border-radius: 12px; padding: 4px 8px; align-self: flex-start; }
   .gt-gallery-carousel { position: relative; margin-top: 20px; }
   .gt-gallery-viewport { position: relative; overflow: hidden; border-radius: 18px; touch-action: pan-y; }
-  .gt-gallery-track { display: flex; width: 100%; transform: translateX(-100%); transition: transform 0.45s cubic-bezier(0.4, 0.12, 0.2, 1); }
+  .gt-gallery-track { display: flex; width: 100%; transform: translate3d(-100%, 0, 0); transition: transform 0.45s cubic-bezier(0.4, 0.12, 0.2, 1); will-change: transform; }
   .gt-gallery-slide { flex: 0 0 100%; padding: 0 8px; display: flex; justify-content: center; }
   .gt-gallery-slide img { width: 100%; max-width: 640px; height: clamp(220px, 60vw, 360px); object-fit: cover; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); cursor: zoom-in; box-shadow: 0 18px 38px rgba(0,0,0,0.35); }
   .gt-gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(11,14,19,0.7); border: 1px solid rgba(255,255,255,0.18); color: #f6f8ff; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; z-index: 2; backdrop-filter: blur(8px); }
@@ -564,14 +564,16 @@
   const $ = (q, el = document) => el.querySelector(q);
   const $$ = (q, el = document) => Array.from(el.querySelectorAll(q));
   const gtMoney = n => (n === null || Number.isNaN(n)) ? '—' : `$${n.toFixed(0)}`;
-  const gtNav = $('.gt-nav');
-  const gtNavSentinel = $('#gt-nav-sentinel');
+    const gtNav = $('.gt-nav');
   const gtNavLinks = $('#gt-nav-links');
   const gtNavToggle = $('#gt-nav-toggle');
   const GT_NAV_CONDENSE_START = 70;
   const GT_NAV_CONDENSE_END = 170;
   const GT_NAV_CONDENSE_RANGE = GT_NAV_CONDENSE_END - GT_NAV_CONDENSE_START;
   const GT_NAV_RELEASE_THRESHOLD = 40;
+  const GT_NAV_RELEASE_RATIO = GT_NAV_CONDENSE_RANGE
+    ? Math.min(1, GT_NAV_RELEASE_THRESHOLD / GT_NAV_CONDENSE_RANGE)
+    : 0.4;
   let gtNavWasCondensed = false;
   let gtNavLastCollapse = 0;
   let gtTouchMoved = false;
@@ -651,39 +653,16 @@
     const isMobile = window.innerWidth <= 760;
     const menuOpen = gtNavLinks && gtNavLinks.classList.contains('show');
     let collapse = 0;
-    let progressPx = 0;
 
     if (isMobile && !menuOpen) {
-      const navRect = gtNav.getBoundingClientRect();
       const scrollY = gtGetScrollPosition();
-      if (scrollY <= GT_NAV_CONDENSE_START) {
-        progressPx = 0;
-      } else if (scrollY >= GT_NAV_CONDENSE_END) {
-        progressPx = GT_NAV_CONDENSE_RANGE;
-      } else {
-        progressPx = scrollY - GT_NAV_CONDENSE_START;
+      let progressPx = 0;
+      if (scrollY > GT_NAV_CONDENSE_START) {
+        progressPx = Math.min(GT_NAV_CONDENSE_RANGE, scrollY - GT_NAV_CONDENSE_START);
       }
-
-      if (gtNavSentinel) {
-        const sentinelTop = gtNavSentinel.getBoundingClientRect().top;
-        const sentinelProgress = (navRect.bottom - sentinelTop) - GT_NAV_CONDENSE_START;
-        const normalizedSentinel = Math.max(0, Math.min(GT_NAV_CONDENSE_RANGE, sentinelProgress));
-        progressPx = Math.max(progressPx, normalizedSentinel);
-      }
-
-      const heroSection = document.getElementById('hero');
-      const heroCard = heroSection ? heroSection.querySelector('.gt-card') : null;
-      if (heroCard) {
-        const heroRect = heroCard.getBoundingClientRect();
-        const overlap = navRect.bottom - heroRect.top;
-        if (overlap > 0) {
-          const navHeight = navRect.height || 1;
-          const normalizedOverlap = Math.max(0, Math.min(1, overlap / navHeight));
-          progressPx = Math.max(progressPx, normalizedOverlap * GT_NAV_CONDENSE_RANGE);
-        }
-      }
-
-      collapse = Math.max(0, Math.min(1, GT_NAV_CONDENSE_RANGE ? (progressPx / GT_NAV_CONDENSE_RANGE) : 0));
+      collapse = GT_NAV_CONDENSE_RANGE
+        ? Math.max(0, Math.min(1, progressPx / GT_NAV_CONDENSE_RANGE))
+        : 0;
     }
 
     if (Math.abs(collapse - gtNavLastCollapse) > 0.001) {
@@ -694,14 +673,15 @@
     let shouldCondense = false;
     if (isMobile && !menuOpen) {
       if (gtNavWasCondensed) {
-        shouldCondense = progressPx > GT_NAV_RELEASE_THRESHOLD;
+        shouldCondense = collapse >= GT_NAV_RELEASE_RATIO;
       } else {
         shouldCondense = collapse >= 0.95;
       }
     }
 
-    gtNav.classList.toggle('is-condensed', shouldCondense && isMobile && !menuOpen);
-    gtNavWasCondensed = isMobile && !menuOpen ? shouldCondense : false;
+    const applyCondensed = shouldCondense && isMobile && !menuOpen;
+    gtNav.classList.toggle('is-condensed', applyCondensed);
+    gtNavWasCondensed = applyCondensed;
   }
 
   function gtHandleGallery(evt) {
@@ -751,6 +731,33 @@
     let startX = 0;
     let deltaX = 0;
 
+    let cachedSlideWidth = 0;
+
+    const measureSlideWidth = () => {
+      const sample = track.querySelector('.gt-gallery-slide');
+      if (sample) {
+        const rect = sample.getBoundingClientRect();
+        if (rect && rect.width) {
+          cachedSlideWidth = rect.width;
+          return cachedSlideWidth;
+        }
+      }
+      if (viewport) {
+        cachedSlideWidth = viewport.clientWidth || viewport.offsetWidth || 0;
+        return cachedSlideWidth;
+      }
+      cachedSlideWidth = 0;
+      return cachedSlideWidth;
+    };
+
+    const getSlideWidth = () => cachedSlideWidth || measureSlideWidth();
+
+    const getOffsetForIndex = (idx = index) => {
+      const width = getSlideWidth();
+      if (!width) return null;
+      return -idx * width;
+    };
+
     const dotsWrapper = carousel.querySelector('.gt-gallery-dots');
     let dots = [];
     if (dotsWrapper) {
@@ -792,7 +799,12 @@
       if (!animate) {
         track.style.transition = 'none';
       }
-      track.style.transform = `translateX(${-index * 100}%)`;
+      const offset = getOffsetForIndex();
+      if (offset === null) {
+        track.style.transform = `translateX(${-index * 100}%)`;
+      } else {
+        track.style.transform = `translate3d(${offset}px, 0, 0)`;
+      }
       updateDots();
       updateSlideAria();
       if (!animate) {
@@ -848,10 +860,13 @@
       if (evt.pointerType === 'mouse' && evt.button !== 0) return;
       if (isSliding) return;
       isDragging = true;
+      if (!cachedSlideWidth) {
+        measureSlideWidth();
+      }
       startX = evt.clientX;
       deltaX = 0;
       track.style.transition = 'none';
-      if (viewport.setPointerCapture) {
+      if (viewport.setPointerCapture && typeof viewport.setPointerCapture === 'function') {
         viewport.setPointerCapture(evt.pointerId);
       }
     }
@@ -859,20 +874,28 @@
     function onPointerMove(evt) {
       if (!isDragging || evt.isPrimary === false) return;
       deltaX = evt.clientX - startX;
-      const percent = viewport.clientWidth ? (deltaX / viewport.clientWidth) * 100 : 0;
-      track.style.transform = `translateX(calc(${-index * 100}% + ${percent}%))`;
+      const offset = getOffsetForIndex();
+      if (offset === null) {
+        const percent = viewport.clientWidth ? (deltaX / viewport.clientWidth) * 100 : 0;
+        track.style.transform = `translateX(calc(${-index * 100}% + ${percent}%))`;
+      } else {
+        track.style.transform = `translate3d(${offset + deltaX}px, 0, 0)`;
+      }
     }
 
     function onPointerUp(evt) {
       if (!isDragging) return;
       const isCancel = evt.type === 'pointercancel' || evt.type === 'pointerleave';
-      if (viewport.releasePointerCapture) {
-        if (!viewport.hasPointerCapture || viewport.hasPointerCapture(evt.pointerId)) {
-          viewport.releasePointerCapture(evt.pointerId);
-        }
+      if (
+        viewport.releasePointerCapture && typeof viewport.releasePointerCapture === 'function' &&
+        viewport.hasPointerCapture && typeof viewport.hasPointerCapture === 'function' &&
+        viewport.hasPointerCapture(evt.pointerId)
+      ) {
+        viewport.releasePointerCapture(evt.pointerId);
       }
       track.style.transition = '';
-      const threshold = viewport.clientWidth * 0.18;
+      const fallbackWidth = viewport ? (viewport.clientWidth || viewport.offsetWidth || 0) : 0;
+      const threshold = (getSlideWidth() || fallbackWidth) * 0.18;
       if (!isCancel && Math.abs(deltaX) > threshold) {
         if (deltaX > 0) {
           goPrev();
@@ -903,9 +926,12 @@
 
     window.addEventListener('resize', () => {
       if (isDragging) return;
+      cachedSlideWidth = 0;
+      measureSlideWidth();
       updatePosition(false);
     });
 
+    measureSlideWidth();
     updatePosition(false);
   }
 
@@ -1274,4 +1300,5 @@
   ]
 }
 {% endschema %}
+
 
