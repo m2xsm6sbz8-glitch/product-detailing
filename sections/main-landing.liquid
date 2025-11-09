@@ -57,10 +57,40 @@
     @media (max-width: 760px) {
       .gt-nav-inner { flex-wrap: nowrap; align-items: flex-start; }
       .gt-nav-toggle { display: inline-flex; }
-      .gt-nav-links { display: none; flex-direction: column; width: 100%; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.12); }
-      .gt-nav-links.show { display: flex; }
+      .gt-nav-links {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-6px);
+        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        --gt-nav-links-height: 0px;
+      }
+      .gt-nav-links,
+      .gt-nav-links.show {
+        max-height: var(--gt-nav-links-height, 0px);
+      }
+      .gt-nav-links.show {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
       .gt-nav-links a { padding: 6px 0; }
-      .gt-nav.is-condensed .gt-nav-links { display: none !important; }
+      .gt-nav.is-condensed .gt-nav-links:not(.show) {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-6px);
+      }
+    }
+    @media (max-width: 760px) and (prefers-reduced-motion: reduce) {
+      .gt-nav-links { transition: none; }
     }
   .gt-muted { color: #a7b0bd; }
   .gt-section-title { margin: 0 0 6px; font-size: clamp(22px, 4vw, 34px); }
@@ -104,9 +134,9 @@
   .gt-addon.disabled::after { content: 'Unavailable'; font-size: 0.75rem; color: #f6f8ff; background: rgba(0,0,0,0.55); border-radius: 12px; padding: 4px 8px; align-self: flex-start; }
   .gt-gallery-carousel { position: relative; margin-top: 20px; }
   .gt-gallery-viewport { position: relative; overflow: hidden; border-radius: 18px; touch-action: pan-y; }
-  .gt-gallery-track { display: flex; width: 100%; transform: translate3d(-100%, 0, 0); transition: transform 0.45s cubic-bezier(0.4, 0.12, 0.2, 1); will-change: transform; }
-  .gt-gallery-slide { flex: 0 0 100%; padding: 0 8px; display: flex; justify-content: center; }
-  .gt-gallery-slide img { width: 100%; max-width: 640px; height: clamp(220px, 60vw, 360px); object-fit: cover; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); cursor: zoom-in; box-shadow: 0 18px 38px rgba(0,0,0,0.35); }
+  .gt-gallery-track { display: flex; width: 100%; transform: translate3d(-100%, 0, 0); transition: transform 0.45s cubic-bezier(0.4, 0.12, 0.2, 1); will-change: transform; align-items: center; }
+  .gt-gallery-slide { flex: 0 0 100%; padding: 0 8px; display: flex; justify-content: center; align-items: center; }
+  .gt-gallery-slide img { width: 100%; max-width: 640px; height: clamp(220px, 60vw, 360px); object-fit: cover; object-position: center center; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); cursor: zoom-in; box-shadow: 0 18px 38px rgba(0,0,0,0.35); display: block; margin: 0 auto; }
   .gt-gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(11,14,19,0.7); border: 1px solid rgba(255,255,255,0.18); color: #f6f8ff; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; z-index: 2; backdrop-filter: blur(8px); }
   .gt-gallery-nav:hover { background: rgba(11,14,19,0.9); transform: translateY(-50%) scale(1.04); }
   .gt-gallery-nav:focus-visible { outline: 2px solid rgba(0,194,255,0.7); outline-offset: 2px; }
@@ -564,9 +594,10 @@
   const $ = (q, el = document) => el.querySelector(q);
   const $$ = (q, el = document) => Array.from(el.querySelectorAll(q));
   const gtMoney = n => (n === null || Number.isNaN(n)) ? '—' : `$${n.toFixed(0)}`;
-    const gtNav = $('.gt-nav');
+  const gtNav = $('.gt-nav');
   const gtNavLinks = $('#gt-nav-links');
   const gtNavToggle = $('#gt-nav-toggle');
+  const GT_NAV_LINKS_HEIGHT_VAR = '--gt-nav-links-height';
   const GT_NAV_CONDENSE_START = 70;
   const GT_NAV_CONDENSE_END = 170;
   const GT_NAV_CONDENSE_RANGE = GT_NAV_CONDENSE_END - GT_NAV_CONDENSE_START;
@@ -642,11 +673,59 @@
     }, { passive: true });
   }
 
-  function gtCloseNavMenu() {
+  function gtSyncNavLinksHeight() {
+    if (!gtNavLinks) return;
+    if (window.innerWidth > 760) {
+      gtNavLinks.style.removeProperty(GT_NAV_LINKS_HEIGHT_VAR);
+      return;
+    }
+    const target = gtNavLinks.classList.contains('show') ? gtNavLinks.scrollHeight : 0;
+    gtNavLinks.style.setProperty(GT_NAV_LINKS_HEIGHT_VAR, `${target}px`);
+  }
+
+  function gtOpenNavMenu() {
     if (!gtNavLinks || !gtNavToggle) return;
-    gtNavLinks.classList.remove('show');
+    const targetHeight = gtNavLinks.scrollHeight;
+    gtNavLinks.style.setProperty(GT_NAV_LINKS_HEIGHT_VAR, '0px');
+    gtNavLinks.classList.add('show');
+    requestAnimationFrame(() => {
+      gtNavLinks.style.setProperty(GT_NAV_LINKS_HEIGHT_VAR, `${targetHeight}px`);
+      requestAnimationFrame(gtSyncNavLinksHeight);
+    });
+    gtNavToggle.setAttribute('aria-expanded', 'true');
+    if (gtNav) {
+      gtNav.classList.remove('is-condensed');
+      gtNav.style.setProperty('--nav-collapse', '0');
+    }
+  }
+
+  function gtCloseNavMenu(animate = true) {
+    if (!gtNavLinks || !gtNavToggle) return;
+    if (!gtNavLinks.classList.contains('show')) {
+      gtNavToggle.setAttribute('aria-expanded', 'false');
+      gtScheduleNavUpdate(true);
+      return;
+    }
+    const targetHeight = gtNavLinks.scrollHeight;
+    gtNavLinks.style.setProperty(GT_NAV_LINKS_HEIGHT_VAR, `${targetHeight}px`);
+    const collapse = (useAnimation) => {
+      gtNavLinks.classList.remove('show');
+      if (useAnimation) {
+        requestAnimationFrame(() => {
+          gtNavLinks.style.setProperty(GT_NAV_LINKS_HEIGHT_VAR, '0px');
+        });
+      } else {
+        gtNavLinks.style.setProperty(GT_NAV_LINKS_HEIGHT_VAR, '0px');
+      }
+    };
+    if (animate) {
+      requestAnimationFrame(() => collapse(true));
+    } else {
+      collapse(false);
+    }
     gtNavToggle.setAttribute('aria-expanded', 'false');
     gtScheduleNavUpdate(true);
+    gtSyncNavLinksHeight();
   }
   function gtUpdateNavCondensed() {
     if (!gtNav) return;
@@ -730,33 +809,19 @@
     let isDragging = false;
     let startX = 0;
     let deltaX = 0;
+    let slideResetTimer = null;
 
-    let cachedSlideWidth = 0;
-
-    const measureSlideWidth = () => {
-      const sample = track.querySelector('.gt-gallery-slide');
-      if (sample) {
-        const rect = sample.getBoundingClientRect();
-        if (rect && rect.width) {
-          cachedSlideWidth = rect.width;
-          return cachedSlideWidth;
+    const scheduleSlideReset = () => {
+      clearTimeout(slideResetTimer);
+      slideResetTimer = setTimeout(() => {
+        if (isSliding) {
+          isSliding = false;
+          updatePosition(false);
         }
-      }
-      if (viewport) {
-        cachedSlideWidth = viewport.clientWidth || viewport.offsetWidth || 0;
-        return cachedSlideWidth;
-      }
-      cachedSlideWidth = 0;
-      return cachedSlideWidth;
+      }, 650);
     };
 
-    const getSlideWidth = () => cachedSlideWidth || measureSlideWidth();
-
-    const getOffsetForIndex = (idx = index) => {
-      const width = getSlideWidth();
-      if (!width) return null;
-      return -idx * width;
-    };
+    const getViewportWidth = () => viewport ? (viewport.clientWidth || viewport.offsetWidth || 0) : 0;
 
     const dotsWrapper = carousel.querySelector('.gt-gallery-dots');
     let dots = [];
@@ -799,12 +864,7 @@
       if (!animate) {
         track.style.transition = 'none';
       }
-      const offset = getOffsetForIndex();
-      if (offset === null) {
-        track.style.transform = `translateX(${-index * 100}%)`;
-      } else {
-        track.style.transform = `translate3d(${offset}px, 0, 0)`;
-      }
+      track.style.transform = `translateX(${-index * 100}%)`;
       updateDots();
       updateSlideAria();
       if (!animate) {
@@ -819,6 +879,15 @@
       isSliding = true;
       index += 1;
       updatePosition(true);
+      scheduleSlideReset();
+    }
+
+    function goPrev() {
+      if (isSliding) return;
+      isSliding = true;
+      index -= 1;
+      updatePosition(true);
+      scheduleSlideReset();
     }
 
     function goPrev() {
@@ -841,16 +910,10 @@
       });
     }
 
-    if (dots.length) {
-      dots.forEach((dot, dotIndex) => {
-        dot.addEventListener('click', evt => {
-          evt.preventDefault();
-          if (isSliding) return;
-          const targetIndex = dotIndex + 1;
-          if (targetIndex === index) return;
           isSliding = true;
           index = targetIndex;
           updatePosition(true);
+          scheduleSlideReset();
         });
       });
     }
@@ -860,9 +923,7 @@
       if (evt.pointerType === 'mouse' && evt.button !== 0) return;
       if (isSliding) return;
       isDragging = true;
-      if (!cachedSlideWidth) {
-        measureSlideWidth();
-      }
+      clearTimeout(slideResetTimer);
       startX = evt.clientX;
       deltaX = 0;
       track.style.transition = 'none';
@@ -874,13 +935,9 @@
     function onPointerMove(evt) {
       if (!isDragging || evt.isPrimary === false) return;
       deltaX = evt.clientX - startX;
-      const offset = getOffsetForIndex();
-      if (offset === null) {
-        const percent = viewport.clientWidth ? (deltaX / viewport.clientWidth) * 100 : 0;
-        track.style.transform = `translateX(calc(${-index * 100}% + ${percent}%))`;
-      } else {
-        track.style.transform = `translate3d(${offset + deltaX}px, 0, 0)`;
-      }
+      const width = getViewportWidth();
+      const percent = width ? (deltaX / width) * 100 : 0;
+      track.style.transform = `translateX(calc(${-index * 100}% + ${percent}%))`;
     }
 
     function onPointerUp(evt) {
@@ -894,8 +951,8 @@
         viewport.releasePointerCapture(evt.pointerId);
       }
       track.style.transition = '';
-      const fallbackWidth = viewport ? (viewport.clientWidth || viewport.offsetWidth || 0) : 0;
-      const threshold = (getSlideWidth() || fallbackWidth) * 0.18;
+      const width = getViewportWidth();
+      const threshold = (width > 0 ? width : 1) * 0.18;
       if (!isCancel && Math.abs(deltaX) > threshold) {
         if (deltaX > 0) {
           goPrev();
@@ -915,7 +972,10 @@
     viewport.addEventListener('pointercancel', onPointerUp);
     viewport.addEventListener('pointerleave', onPointerUp);
 
-    track.addEventListener('transitionend', () => {
+    track.addEventListener('transitionend', evt => {
+      if (evt.target !== track || evt.propertyName !== 'transform') return;
+      clearTimeout(slideResetTimer);
+      slideResetTimer = null;
       const current = track.children[index];
       if (current && current.dataset.clone === 'true') {
         index = index === 0 ? totalSlides : 1;
@@ -926,35 +986,42 @@
 
     window.addEventListener('resize', () => {
       if (isDragging) return;
-      cachedSlideWidth = 0;
-      measureSlideWidth();
       updatePosition(false);
     });
 
-    measureSlideWidth();
     updatePosition(false);
+  }
+
+  if (gtNavLinks) {
+    gtNavLinks.addEventListener('transitionend', evt => {
+      if (evt.target !== gtNavLinks || evt.propertyName !== 'max-height') return;
+      if (gtNavLinks.classList.contains('show')) {
+        gtNavLinks.style.setProperty(GT_NAV_LINKS_HEIGHT_VAR, `${gtNavLinks.scrollHeight}px`);
+      }
+    });
   }
 
   if (gtNavToggle && gtNavLinks) {
     gtNavToggle.addEventListener('click', () => {
-      const isOpen = gtNavLinks.classList.toggle('show');
-      gtNavToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      if (!isOpen) {
-        gtScheduleNavUpdate(true);
-      } else if (gtNav) {
-        gtNav.classList.remove('is-condensed');
-        gtNav.style.setProperty('--nav-collapse', '0');
+      if (gtNavLinks.classList.contains('show')) {
+        gtCloseNavMenu();
+      } else {
+        gtOpenNavMenu();
       }
     });
   }
   window.addEventListener('resize', () => {
     if (window.innerWidth > 760) {
-      gtCloseNavMenu();
+      gtCloseNavMenu(false);
     }
+    gtSyncNavLinksHeight();
     gtScheduleNavUpdate();
   });
   window.addEventListener('orientationchange', () => {
-    setTimeout(() => gtScheduleNavUpdate(true), 50);
+    setTimeout(() => {
+      gtScheduleNavUpdate(true);
+      gtSyncNavLinksHeight();
+    }, 50);
   });
   window.addEventListener('scroll', () => {
     gtScheduleNavUpdate();
@@ -1264,14 +1331,17 @@
   gtUpdateNavCondensed();
   gtHydrateStatic();
   gtInitGalleryCarousel();
+  gtSyncNavLinksHeight();
   document.addEventListener('shopify:section:load', evt => {
     gtHydrateStatic(evt.target || document);
     gtInitGalleryCarousel(evt.target || document);
     gtScheduleNavUpdate(true);
+    gtSyncNavLinksHeight();
   });
   document.addEventListener('shopify:section:select', evt => {
     gtHydrateStatic(evt.target || document);
     gtScheduleNavUpdate(true);
+    gtSyncNavLinksHeight();
   });
   </script>
 
@@ -1300,5 +1370,6 @@
   ]
 }
 {% endschema %}
+
 
 
