@@ -890,13 +890,6 @@
       scheduleSlideReset();
     }
 
-    function goPrev() {
-      if (isSliding) return;
-      isSliding = true;
-      index -= 1;
-      updatePosition(true);
-    }
-
     if (prevBtn) {
       prevBtn.addEventListener('click', evt => {
         evt.preventDefault();
@@ -910,6 +903,12 @@
       });
     }
 
+    if (dots.length) {
+      dots.forEach((dot, dotIndex) => {
+        dot.addEventListener('click', evt => {
+          evt.preventDefault();
+          const targetIndex = dotIndex + 1;
+          if (targetIndex === index) return;
           isSliding = true;
           index = targetIndex;
           updatePosition(true);
@@ -1370,6 +1369,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
