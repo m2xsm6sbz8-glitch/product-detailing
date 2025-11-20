@@ -1282,19 +1282,20 @@ client configured on this device or copy the summary and email <a style="color:i
     }
     const subject = encodeURIComponent(`[${GT_COMPANY.brand}] Booking Request — ${name}`);
     const lineBreak = '\r\n';
-    const summaryText = ($('#gt-selection-summary').textContent || '').split('\n').join(lineBreak);
+    const normalizeLines = (value) => (value == null ? '' : String(value).replace(/\r?\n/g, lineBreak));
+    const summaryText = normalizeLines($('#gt-selection-summary').textContent || '');
     const body = encodeURIComponent([
-      `Name: ${name}`,
-      `Phone: ${phone}`,
-      `Email: ${email}`,
-      `Address: ${address}`,
-      `Preferred Date/Time: ${date} @ ${time}`,
+      `Name: ${normalizeLines(name)}`,
+      `Phone: ${normalizeLines(phone)}`,
+      `Email: ${normalizeLines(email)}`,
+      `Address: ${normalizeLines(address)}`,
+      `Preferred Date/Time: ${normalizeLines(`${date} @ ${time}`)}`,
       '',
       '--- Selected Service ---',
       summaryText,
       '',
       'Notes:',
-      notes || '—'
+      normalizeLines(notes || '—')
     ].join(lineBreak));
     const mailto = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${body}`;
     const mailtoLink = document.createElement('a');
@@ -1444,6 +1445,7 @@ client configured on this device or copy the summary and email <a style="color:i
   ]
 }
 {% endschema %}
+
 
 
 
