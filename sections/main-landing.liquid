@@ -1323,7 +1323,8 @@ client configured on this device or copy the summary and email <a style="color:i
       'Notes:',
       normalizeLines(notes || '—')
     ].join(lineBreak);
-    const mailto = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${encodeURIComponent(body)}`;
+    const encodedBody = encodeURIComponent(body).replace(/%0A/g, '%0D%0A');
+    const mailto = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${encodedBody}`;
     const mailtoLink = document.createElement('a');
     mailtoLink.href = mailto;
     mailtoLink.target = '_self';
@@ -1498,6 +1499,7 @@ client configured on this device or copy the summary and email <a style="color:i
   ]
 }
 {% endschema %}
+
 
 
 
