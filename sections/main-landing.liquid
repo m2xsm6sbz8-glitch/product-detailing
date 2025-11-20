@@ -1229,11 +1229,7 @@ client configured on this device or copy the summary and email <a style="color:i
     return null;
   }
 
-  function gtApplySelection() {
-    const err = gtRequireModalFields();
-    if (err) { alert(err); return; }
-    const tier = GT_DATA.tiers[gtState.openTier];
-    if (!tier) return;
+  function gtBuildSummary(tier, { lineBreak = '\n' } = {}) {
     const svc = gtLabelService(gtState.service);
     const veh = gtLabelVehicle(gtState.vehicle);
     const util = gtState.utilities === 'yes' ? 'Yes (bonus add-on included)' : 'No';
@@ -1252,12 +1248,26 @@ client configured on this device or copy the summary and email <a style="color:i
     ];
     const inclusionSections = [];
     if (gtState.service === 'exterior' || gtState.service === 'full') {
-      inclusionSections.push(`Inclusions — Exterior:\n• ${tier.includes.exterior.join('\n• ')}`);
+      inclusionSections.push([
+        'Inclusions — Exterior:',
+        ...tier.includes.exterior
+      ].join(lineBreak));
     }
     if (gtState.service === 'interior' || gtState.service === 'full') {
-      inclusionSections.push(`Inclusions — Interior:\n• ${tier.includes.interior.join('\n• ')}`);
+      inclusionSections.push([
+        'Inclusions — Interior:',
+        ...tier.includes.interior
+      ].join(lineBreak));
     }
-    const summaryText = summaryParts.join('\n') + (inclusionSections.length ? `\n\n${inclusionSections.join('\n\n')}` : '');
+    return summaryParts.join(lineBreak) + (inclusionSections.length ? `${lineBreak}${lineBreak}${inclusionSections.join(lineBreak + lineBreak)}` : '');
+  }
+
+  function gtApplySelection() {
+    const err = gtRequireModalFields();
+    if (err) { alert(err); return; }
+    const tier = GT_DATA.tiers[gtState.openTier];
+    if (!tier) return;
+    const summaryText = gtBuildSummary(tier);
     $('#gt-selection-summary').textContent = summaryText;
     $('#gt-price-chip').textContent = `Total: ${gtMoney(gtState.total)}`;
     gtCloseModal();
@@ -1281,10 +1291,11 @@ client configured on this device or copy the summary and email <a style="color:i
       return false;
     }
     const subject = encodeURIComponent(`[${GT_COMPANY.brand}] Booking Request — ${name}`);
-    const lineBreak = '\r\n';
+    const lineBreak = '\n';
     const normalizeLines = (value) => (value == null ? '' : String(value).replace(/\r?\n/g, lineBreak));
-    const summaryText = normalizeLines($('#gt-selection-summary').textContent || '');
-    const body = encodeURIComponent([
+    const tier = GT_DATA.tiers[gtState.openTier];
+    const summaryText = tier ? gtBuildSummary(tier, { lineBreak }) : '';
+    const body = [
       `Name: ${normalizeLines(name)}`,
       `Phone: ${normalizeLines(phone)}`,
       `Email: ${normalizeLines(email)}`,
@@ -1292,12 +1303,12 @@ client configured on this device or copy the summary and email <a style="color:i
       `Preferred Date/Time: ${normalizeLines(`${date} @ ${time}`)}`,
       '',
       '--- Selected Service ---',
-      summaryText,
+      normalizeLines(summaryText),
       '',
       'Notes:',
       normalizeLines(notes || '—')
-    ].join(lineBreak));
-    const mailto = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${body}`;
+    ].join(lineBreak);
+    const mailto = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${encodeURIComponent(body)}`;
     const mailtoLink = document.createElement('a');
     mailtoLink.href = mailto;
     mailtoLink.target = '_self';
@@ -1445,6 +1456,7 @@ client configured on this device or copy the summary and email <a style="color:i
   ]
 }
 {% endschema %}
+
 
 
 
