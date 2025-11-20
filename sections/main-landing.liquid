@@ -1304,7 +1304,7 @@ client configured on this device or copy the summary and email <a style="color:i
       alert('Please complete all required booking fields.');
       return false;
     }
-    const subject = encodeURIComponent(`[${GT_COMPANY.brand}] Booking Request — ${name}`);
+    const subject = `[${GT_COMPANY.brand}] Booking Request — ${name}`;
     const lineBreak = '\n';
     const normalizeLines = (value) => (value == null ? '' : String(value).replace(/\r?\n/g, lineBreak));
     const tier = GT_DATA.tiers[gtState.openTier];
@@ -1537,6 +1537,7 @@ client configured on this device or copy the summary and email <a style="color:i
   ]
 }
 {% endschema %}
+
 
 
 
