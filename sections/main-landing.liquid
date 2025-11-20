@@ -1262,6 +1262,20 @@ client configured on this device or copy the summary and email <a style="color:i
     return summaryParts.join(lineBreak) + (inclusionSections.length ? `${lineBreak}${lineBreak}${inclusionSections.join(lineBreak + lineBreak)}` : '');
   }
 
+  function gtFormatPlainSummary(summaryText, { lineBreak = '\n' } = {}) {
+    const normalizedBreak = lineBreak || '\n';
+    const normalized = (summaryText == null ? '' : String(summaryText)).replace(/\r?\n/g, normalizedBreak);
+    const lines = normalized.split(normalizedBreak);
+    const formatted = lines.map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return '';
+      const withoutBullet = trimmed.replace(/^[\u2022•\-*\u2013\u2014\u00b7]+\s*/, '');
+      const withoutTrailing = withoutBullet.replace(/[;,:.]+$/, '');
+      return `- ${withoutTrailing}`;
+    });
+    return formatted.join(normalizedBreak);
+  }
+
   function gtApplySelection() {
     const err = gtRequireModalFields();
     if (err) { alert(err); return; }
@@ -1295,6 +1309,7 @@ client configured on this device or copy the summary and email <a style="color:i
     const normalizeLines = (value) => (value == null ? '' : String(value).replace(/\r?\n/g, lineBreak));
     const tier = GT_DATA.tiers[gtState.openTier];
     const summaryText = tier ? gtBuildSummary(tier, { lineBreak }) : '';
+    const plainSummary = gtFormatPlainSummary(summaryText, { lineBreak });
     const body = [
       `Name: ${normalizeLines(name)}`,
       `Phone: ${normalizeLines(phone)}`,
@@ -1303,7 +1318,7 @@ client configured on this device or copy the summary and email <a style="color:i
       `Preferred Date/Time: ${normalizeLines(`${date} @ ${time}`)}`,
       '',
       '--- Selected Service ---',
-      normalizeLines(summaryText),
+      normalizeLines(plainSummary),
       '',
       'Notes:',
       normalizeLines(notes || '—')
@@ -1331,7 +1346,34 @@ client configured on this device or copy the summary and email <a style="color:i
       alert('Configure a package first.');
       return;
     }
-    navigator.clipboard.writeText(text).then(() => alert('Summary copied!'));
+    const plainText = gtFormatPlainSummary(text);
+    const copyPromise = (navigator.clipboard && typeof navigator.clipboard.writeText === 'function')
+      ? navigator.clipboard.writeText(plainText)
+      : new Promise((resolve, reject) => {
+          try {
+            const textarea = document.createElement('textarea');
+            textarea.value = plainText;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            const success = document.execCommand('copy');
+            textarea.remove();
+            if (!success) {
+              reject(new Error('Copy command failed'));
+            } else {
+              resolve();
+            }
+          } catch (err) {
+            reject(err);
+          }
+        });
+    copyPromise
+      .then(() => alert('Summary copied!'))
+      .catch(() => alert('Unable to copy the summary. Please copy it manually.'));
   }
 
   function gtHydrateStatic(root = document) {
@@ -1456,6 +1498,7 @@ client configured on this device or copy the summary and email <a style="color:i
   ]
 }
 {% endschema %}
+
 
 
 
