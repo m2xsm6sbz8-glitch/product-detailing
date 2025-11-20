@@ -1304,8 +1304,8 @@ client configured on this device or copy the summary and email <a style="color:i
       alert('Please complete all required booking fields.');
       return false;
     }
-    const subject = encodeURIComponent(`[${GT_COMPANY.brand}] Booking Request — ${name}`);
-    const lineBreak = '\r\n';
+    const subject = `[${GT_COMPANY.brand}] Booking Request — ${name}`;
+    const lineBreak = '\n';
     const normalizeLines = (value) => (value == null ? '' : String(value).replace(/\r?\n/g, lineBreak));
     const tier = GT_DATA.tiers[gtState.openTier];
     const svc = tier ? gtLabelService(gtState.service) : '';
@@ -1371,18 +1371,10 @@ client configured on this device or copy the summary and email <a style="color:i
       '',
       notesSection
     ].join(lineBreak);
-    const encodedBody = encodeURIComponent(body);
-    const mailto = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${encodedBody}`;
-    const mailtoLink = document.createElement('a');
-    mailtoLink.href = mailto;
-    mailtoLink.target = '_self';
-    mailtoLink.rel = 'noopener noreferrer';
-    mailtoLink.style.display = 'none';
-    document.body.appendChild(mailtoLink);
-    mailtoLink.click();
-    requestAnimationFrame(() => mailtoLink.remove());
+    const params = new URLSearchParams({ subject, body });
+    const query = params.toString().replace(/%0A/g, '%0D%0A');
+    const mailto = `mailto:${GT_COMPANY.salesEmail}?${query}`;
     window.location.href = mailto;
-    requestAnimationFrame(() => mailtoLink.remove());
     setTimeout(() => {
       if (document.visibilityState === 'visible') {
         alert(`If your email app didn’t open, please email us at ${GT_COMPANY.salesEmail} with your booking details.`);
@@ -1549,6 +1541,7 @@ client configured on this device or copy the summary and email <a style="color:i
   ]
 }
 {% endschema %}
+
 
 
 
