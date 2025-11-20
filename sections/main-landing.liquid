@@ -457,7 +457,7 @@
     <p class="gt-muted" style="max-width:70ch;">Choose a date, confirm your contact information, and we’ll prepare an email with your configuration summary. You can review everything before sending.</p>
     <div class="gt-grid gt-cols-12">
       <div class="gt-col-8 gt-card" style="padding:18px;">
-        <form id="gt-booking-form" onsubmit="return gtComposeEmail();">
+        <form id="gt-booking-form" onsubmit="return gtComposeEmail(event);">
           <div class="gt-split">
             <div class="gt-form-row"><label for="gt-name">Full Name</label><input id="gt-name" class="gt-input" required placeholder="First &amp; Last Name"/></div>
             <div class="gt-form-row"><label for="gt-phone">Phone</label><input id="gt-phone" class="gt-input" type="tel" required placeholder="(###) ###-####"/></div>
@@ -474,6 +474,8 @@
             <button type="button" class="gt-btn" onclick="gtCopySummary();">Copy Summary</button>
             <span class="gt-chip">📧 You’ll review the email before sending</span>
           </div>
+          <p class="gt-muted" style="font-size:0.9rem;margin:8px 0 0;">If no email window opens, ensure you have a default mail
+client configured on this device or copy the summary and email <a style="color:inherit;text-decoration:underline;" id="gt-sales-email-link"></a>.</p>
         </form>
       </div>
       <div class="gt-col-4">
@@ -1263,7 +1265,10 @@
     if (booking) booking.scrollIntoView({ behavior: 'smooth' });
   }
 
-  function gtComposeEmail() {
+  function gtComposeEmail(evt) {
+    if (evt && typeof evt.preventDefault === 'function') {
+      evt.preventDefault();
+    }
     const name = $('#gt-name').value.trim();
     const phone = $('#gt-phone').value.trim();
     const email = $('#gt-email').value.trim();
@@ -1289,7 +1294,20 @@
       'Notes:',
       notes || '—'
     ].join('\\n'));
-    window.location.href = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${body}`;
+    const mailto = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${body}`;
+    const mailtoLink = document.createElement('a');
+    mailtoLink.href = mailto;
+    mailtoLink.target = '_self';
+    mailtoLink.rel = 'noopener noreferrer';
+    mailtoLink.style.display = 'none';
+    document.body.appendChild(mailtoLink);
+    mailtoLink.click();
+    requestAnimationFrame(() => mailtoLink.remove());
+    setTimeout(() => {
+      if (document.visibilityState === 'visible') {
+        alert(`If your email app didn’t open, please email us at ${GT_COMPANY.salesEmail} with your booking details.`);
+      }
+    }, 500);
     return false;
   }
 
@@ -1307,6 +1325,11 @@
     if (year) year.textContent = new Date().getFullYear();
     const callBtn = root.getElementById ? root.getElementById('gt-tap-call') : $('#gt-tap-call', root);
     if (callBtn) callBtn.href = `tel:${GT_COMPANY.phone.replace(/[^+\d]/g,'')}`;
+    const salesEmailLink = root.getElementById ? root.getElementById('gt-sales-email-link') : $('#gt-sales-email-link', root);
+    if (salesEmailLink) {
+      salesEmailLink.href = `mailto:${GT_COMPANY.salesEmail}`;
+      salesEmailLink.textContent = GT_COMPANY.salesEmail;
+    }
   }
 
   function gtSmoothAnchors(evt) {
@@ -1419,6 +1442,7 @@
   ]
 }
 {% endschema %}
+
 
 
 
