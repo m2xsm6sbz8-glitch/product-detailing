@@ -1308,20 +1308,68 @@ client configured on this device or copy the summary and email <a style="color:i
     const lineBreak = '\r\n';
     const normalizeLines = (value) => (value == null ? '' : String(value).replace(/\r?\n/g, lineBreak));
     const tier = GT_DATA.tiers[gtState.openTier];
-    const summaryText = tier ? gtBuildSummary(tier, { lineBreak }) : '';
-    const plainSummary = gtFormatPlainSummary(summaryText, { lineBreak });
-    const body = [
+    const svc = tier ? gtLabelService(gtState.service) : '';
+    const veh = tier ? gtLabelVehicle(gtState.vehicle) : '';
+    const util = tier ? (gtState.utilities === 'yes' ? 'Yes (bonus add-on included)' : 'No') : '';
+
+    const chosenAddons = Array.from(gtState.addons).map(id => {
+      const addon = GT_DATA.addons.find(x => x.id === id);
+      if (!addon || addon.disabled) return null;
+      if (addon.price == null) return `${addon.label} (quote)`;
+      return `${addon.label} — ${gtMoney(addon.price)}`;
+    }).filter(Boolean);
+
+    const inclusionLines = [];
+    if (tier) {
+      if (gtState.service === 'exterior' || gtState.service === 'full') {
+        inclusionLines.push('Exterior:', ...tier.includes.exterior.map(item => `- ${item}`));
+      }
+      if (gtState.service === 'interior' || gtState.service === 'full') {
+        inclusionLines.push('Interior:', ...tier.includes.interior.map(item => `- ${item}`));
+      }
+    }
+
+    const contactSection = [
+      'Contact Information',
       `Name: ${normalizeLines(name)}`,
       `Phone: ${normalizeLines(phone)}`,
       `Email: ${normalizeLines(email)}`,
-      `Address: ${normalizeLines(address)}`,
-      `Preferred Date/Time: ${normalizeLines(`${date} @ ${time}`)}`,
-      '',
-      '--- Selected Service ---',
-      normalizeLines(plainSummary),
-      '',
-      'Notes:',
+      `Address: ${normalizeLines(address)}`
+    ].join(lineBreak);
+
+    const scheduleSection = [
+      'Preferred Date & Time',
+      normalizeLines(`${date} @ ${time}`)
+    ].join(lineBreak);
+
+    const packageSection = [
+      'Selected Package',
+      tier ? `Package: ${normalizeLines(tier.name)} (${svc})` : 'Package: —',
+      tier ? `Vehicle Type: ${normalizeLines(veh)}` : 'Vehicle Type: —',
+      tier ? `Water & Electricity Provided: ${normalizeLines(util)}` : 'Water & Electricity Provided: —',
+      tier ? `Estimated Total: ${gtMoney(gtState.total)}` : 'Estimated Total: —'
+    ].concat(inclusionLines.length ? ['Included Services:', ...inclusionLines] : []).join(lineBreak);
+
+    const addonsSection = [
+      'Add-Ons',
+      ...((chosenAddons.length ? chosenAddons : ['None selected']).map(normalizeLines))
+    ].join(lineBreak);
+
+    const notesSection = [
+      'Notes',
       normalizeLines(notes || '—')
+    ].join(lineBreak);
+
+    const body = [
+      contactSection,
+      '',
+      scheduleSection,
+      '',
+      packageSection,
+      '',
+      addonsSection,
+      '',
+      notesSection
     ].join(lineBreak);
     const encodedBody = encodeURIComponent(body);
     const mailto = `mailto:${GT_COMPANY.salesEmail}?subject=${subject}&body=${encodedBody}`;
@@ -1501,5 +1549,6 @@ client configured on this device or copy the summary and email <a style="color:i
   ]
 }
 {% endschema %}
+
 
 
