@@ -1372,7 +1372,10 @@ client configured on this device or copy the summary and email <a style="color:i
       notesSection
     ].join(lineBreak);
     const params = new URLSearchParams({ subject, body });
-    const query = params.toString().replace(/%0A/g, '%0D%0A');
+    const query = params
+      .toString()
+      .replace(/\+/g, '%20')
+      .replace(/%0A/g, '%0D%0A');
     const mailto = `mailto:${GT_COMPANY.salesEmail}?${query}`;
     window.location.href = mailto;
     setTimeout(() => {
@@ -1541,6 +1544,7 @@ client configured on this device or copy the summary and email <a style="color:i
   ]
 }
 {% endschema %}
+
 
 
 
