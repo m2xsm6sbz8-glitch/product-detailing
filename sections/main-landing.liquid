@@ -1304,8 +1304,8 @@ client configured on this device or copy the summary and email <a style="color:i
       alert('Please complete all required booking fields.');
       return false;
     }
-    const subject = `[${GT_COMPANY.brand}] Booking Request — ${name}`;
-    const lineBreak = '\n';
+    const subject = encodeURIComponent(`[${GT_COMPANY.brand}] Booking Request — ${name}`);
+    const lineBreak = '\r\n';
     const normalizeLines = (value) => (value == null ? '' : String(value).replace(/\r?\n/g, lineBreak));
     const tier = GT_DATA.tiers[gtState.openTier];
     const svc = tier ? gtLabelService(gtState.service) : '';
@@ -1336,12 +1336,10 @@ client configured on this device or copy the summary and email <a style="color:i
       `Email: ${normalizeLines(email)}`,
       `Address: ${normalizeLines(address)}`
     ].join(lineBreak);
-
     const scheduleSection = [
       'Preferred Date & Time',
       normalizeLines(`${date} @ ${time}`)
     ].join(lineBreak);
-
     const packageSection = [
       'Selected Package',
       tier ? `Package: ${normalizeLines(tier.name)} (${svc})` : 'Package: —',
@@ -1349,17 +1347,14 @@ client configured on this device or copy the summary and email <a style="color:i
       tier ? `Water & Electricity Provided: ${normalizeLines(util)}` : 'Water & Electricity Provided: —',
       tier ? `Estimated Total: ${gtMoney(gtState.total)}` : 'Estimated Total: —'
     ].concat(inclusionLines.length ? ['Included Services:', ...inclusionLines] : []).join(lineBreak);
-
     const addonsSection = [
       'Add-Ons',
       ...((chosenAddons.length ? chosenAddons : ['None selected']).map(normalizeLines))
     ].join(lineBreak);
-
     const notesSection = [
       'Notes',
       normalizeLines(notes || '—')
     ].join(lineBreak);
-
     const body = [
       contactSection,
       '',
@@ -1371,12 +1366,10 @@ client configured on this device or copy the summary and email <a style="color:i
       '',
       notesSection
     ].join(lineBreak);
-    const params = new URLSearchParams({ subject, body });
-    const query = params
-      .toString()
-      .replace(/\+/g, '%20')
+    const encodedSubject = encodeURIComponent(subject);
+    const encodedBody = encodeURIComponent(body.replace(/\r?\n/g, lineBreak))
       .replace(/%0A/g, '%0D%0A');
-    const mailto = `mailto:${GT_COMPANY.salesEmail}?${query}`;
+    const mailto = `mailto:${GT_COMPANY.salesEmail}?subject=${encodedSubject}&body=${encodedBody}`;
     window.location.href = mailto;
     setTimeout(() => {
       if (document.visibilityState === 'visible') {
@@ -1544,6 +1537,7 @@ client configured on this device or copy the summary and email <a style="color:i
   ]
 }
 {% endschema %}
+
 
 
 
